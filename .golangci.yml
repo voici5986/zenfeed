@@ -1,0 +1,57 @@
+version: "2"
+run:
+  timeout: 5m
+
+# https://golangci-lint.run/usage/linters.
+linters:
+  settings:
+    gocognit:
+      min-complexity: 15
+    cyclop:
+      max-complexity: 10
+
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - bodyclose
+    - copyloopvar
+    - cyclop
+    - gocognit
+    - errorlint
+    - funlen
+    - gocognit
+    - goheader
+    - iface
+    - importas
+    - inamedparam
+    - intrange
+    - lll
+    - maintidx
+    - nestif
+    - nlreturn
+    - noctx
+    - paralleltest
+    - perfsprint
+    - prealloc
+    - promlinter
+    - reassign
+  exclusions:
+    rules:
+      - path: pkg/rewrite/rewrite.go
+        linters:
+          - lll # For prompt.
+      - path: pkg/config/config.go
+        linters:
+          - lll # For schema tag.
+      - path: pkg/notify/channel/email.go
+        linters:
+          - lll # For HTML template.
+      - path: main.go
+        linters:
+          - lll # For disclaimer.
+          - cyclop
+    paths:
+      - ".*\\_test\\.go$"

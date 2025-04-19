@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+  zenfeed:
+    image: glidea/zenfeed:latest
+    volumes:
+      - data:/app/data
+      - type: bind
+        source: ./config
+        target: /app/config
+    ports:
+      - "1300:1300"
+      - "1301:1301"
+    depends_on:
+      - rsshub
+
+  rsshub:
+    image: diygod/rsshub:latest
+    ports:
+      - "1200:1200"
+    environment:
+      - NODE_ENV=production
+      
+volumes:
+  data: {}

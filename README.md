@@ -1,0 +1,200 @@
+## 项目介绍
+zenfeed 是你的智能信息助手。它自动收集、筛选并总结关注的新闻或话题，然后发送给你。但我们可不是又造了一个 "今日头条"... 🤔
+
+![Zenfeed](docs/images/arch.png)
+
+**For [RSS](https://zh.wikipedia.org/wiki/RSS) 老司机** 🚗
+* zenfeed 可以是你的 AI 版 RSS 阅读器（配合 [zenfeed-web](https://github.com/glidea/zenfeed-web)）
+* [RSSHub](https://github.com/DIYgod/RSSHub) 的 [MCP](https://mcp.so/) Server
+* 可自定义可信 RSS 数据源，且速度超快的 AI 搜索引擎
+* 与 [Feedly AI](https://feedly.com/ai) 类似
+<details>
+  <summary>预览</summary>
+  <img src="docs/images/feed-list-with-web.png" alt="" width="600">
+  <img src="docs/images/chat-with-feeds.png" alt="Chat with feeds" width="500">
+</details>
+
+
+**For [万物追踪](https://www.wwzzai.com/) 替代品寻觅者** 🔍
+* zenfeed 同样拥有 [信息追踪能力](https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md#%E8%B0%83%E5%BA%A6%E9%85%8D%E7%BD%AE-scheduls)，且更强调高质量，自定义的数据源
+* [AI 首席情报官](https://github.com/TeamWiseFlow/wiseflow?tab=readme-ov-file) 的 RSS 版，灵活版，更接近 PaaS 形态
+<details>
+  <summary>预览</summary>
+  <img src="docs/images/monitoring.png" alt="" width="500">
+  <img src="docs/images/notification-with-web.png" alt="" width="500">
+</details>
+
+
+**For 信息焦虑症患者(比如我)** 😌
+* "zenfeed" 是 "zen" 和 "feed" 的组合，意为在 feed（信息洪流）中，愿你保持 zen（禅定）
+* 如果你对时不时地刷信息流感到焦虑疲惫，这是因为上下文切换的成本比想象得高，同时也妨碍了你进入心流。推荐你试试简报功能，每天固定时间收到对应时间段的简报邮件，从而一次性地，快速地，总览地完成阅读。啊哈有点文艺复兴的意味是吗 ✨
+<details>
+  <summary>预览</summary>
+  <img src="docs/images/daily-brief.png" alt="" width="500">
+</details>
+
+
+**For AI 内容处理的探索者** 🔬
+* zenfeed 有一种对内容进行管道化处理的自定义机制，类似 Prometheus [Relabeling](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config)
+* 每篇内容都被抽象成一个标签集合（比如标题，来源，正文... 都是标签），在管道的每一个节点，可以基于自定义 Prompt 对特定标签值进行处理（比如评分、分类、摘要、过滤、添加新标签等...），而后基于标签查询过滤，[路由](https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md#%E9%80%9A%E7%9F%A5%E8%B7%AF%E7%94%B1%E9%85%8D%E7%BD%AE-notifyroute-%E5%8F%8A-notifyroutesub_routes)，[展示](https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md#%E9%80%9A%E7%9F%A5%E6%B8%A0%E9%81%93-email-%E9%85%8D%E7%BD%AE-notifychannelsemail)... See [Rewrite Rules](https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md#%E9%87%8D%E5%86%99%E8%A7%84%E5%88%99%E9%85%8D%E7%BD%AE-storagefeedrewrites)
+* 重要的是你可以灵活的编排这一切，这赋予了 zenfeed 浓重的工具化，个性化色彩。欢迎通过 Push API 集成私有数据，探索更多的可能性
+<details>
+  <summary>预览</summary>
+  <img src="docs/images/update-config-with-web.png" alt="" width="500">
+</details>
+
+
+**For 吃瓜群众** 🍉
+
+就冲这精美的邮件样式，请立即安装使用！
+
+<img src="docs/images/monitoring.png" alt="" width="400">
+
+[更多效果预览](docs/preview.md)
+
+## 安装与使用
+
+### 1. 安装
+
+替换下方 APIKey 等参数，并完整复制到终端一键执行。注意：
+
+1. `provider` 除了硅基还支持 openai, openrouter, deepseek, gemini, volc（火山(keng)引擎）。也可自定义，参考 [配置文档](docs/config-zh.md)。需要自定义其它参数的大佬也可参考
+
+2. `llms[0].model` 默认会用来总结内容，相对耗费 Token，一般 Qwen/Qwen2.5-7B-Instruct（免费！！！）足够，当然米够的话越强越好。如果你还没有硅基账号，使用 [邀请链接](https://cloud.siliconflow.cn/i/U2VS0Q5A) 得 14 元额度
+
+#### Mac/Linux
+
+```bash
+docker run --rm \
+  -v "$(PWD):/app" \
+  -w /app \
+  --entrypoint sh \
+  mikefarah/yq -c '
+    set -e
+    mkdir -p zenfeed/config && cd zenfeed
+
+    TEMPLATE_URL="https://raw.githubusercontent.com/glidea/zenfeed/main/install/config-template.yaml"
+    COMPOSE_URL="https://raw.githubusercontent.com/glidea/zenfeed/main/install/docker-compose.yml"
+    CONFIG_OUTPUT="config/config.yaml"
+    COMPOSE_OUTPUT="docker-compose.yml"
+
+    curl -sfL "$TEMPLATE_URL" | yq \
+        '.timezone = "Asia/Shanghai" |
+          .llms[0].provider = siliconflow |
+          .llms[0].model = Qwen/Qwen2.5-32B-Instruct |
+          .llms[0].api_key = your_api_key | # 替换！！！其它参数按需选择
+          .llms[1].provider = siliconflow |
+          .llms[1].embedding_model = Pro/BAAI/bge-m3 |
+          .llms[1].api_key = your_api_key | # 替换！！！
+          .storage.feed.rewrites[0].transform.to_text.prompt = {{.summary_html_snippet}}使用中文回复' \
+        > "$CONFIG_OUTPUT"
+
+    curl -sfL "$COMPOSE_URL" -o "$COMPOSE_OUTPUT"
+' && cd zenfeed && docker compose up -d --wait
+```
+
+#### Windows
+> 使用 PowerShell 执行
+```powershell
+docker run --rm `
+  -v "${PWD}:/app" `
+  -w /app `
+  --entrypoint sh `
+  mikefarah/yq -c '
+    set -e;
+    mkdir -p zenfeed/config && cd zenfeed;
+
+    TEMPLATE_URL="https://raw.githubusercontent.com/glidea/zenfeed/main/install/config-template.yaml";
+    COMPOSE_URL="https://raw.githubusercontent.com/glidea/zenfeed/main/install/docker-compose.yml";
+    CONFIG_OUTPUT="config/config.yaml";
+    COMPOSE_OUTPUT="docker-compose.yml";
+
+    curl -sfL "$TEMPLATE_URL" | yq `
+        ''.timezone = "Asia/Shanghai" |
+          .llms[0].provider = "siliconflow" |
+          .llms[0].model = "Qwen/Qwen2.5-32B-Instruct" |
+          .llms[0].api_key = "your_api_key" | # 替换！！！其它参数按需选择
+          .llms[1].provider = "siliconflow" |
+          .llms[1].embedding_model = "Pro/BAAI/bge-m3" |
+          .llms[1].api_key = "your_api_key" | # 替换！！！
+          .storage.feed.rewrites[0].transform.to_text.prompt = "{{.summary_html_snippet}}使用中文回复"'' `
+        > "$CONFIG_OUTPUT";
+
+    curl -sfL "$COMPOSE_URL" -o "$COMPOSE_OUTPUT";
+' ; cd zenfeed; docker compose up -d --wait
+```
+
+### 2. 使用 Web 端
+
+访问 https://zenfeed-web.pages.dev
+
+> 会默认连接本地的 zenfeed
+
+#### 添加 RSS 订阅源
+
+<img src="docs/images/web-add-source.png" alt="" width="400">
+
+> 从 Follow 迁移过来，参考 [migrate-from-follow.md](docs/migrate-from-follow.md)
+
+#### 配置每日简报，监控等
+
+<img src="docs/images/notification-with-web.png" alt="" width="400">
+
+### 2. 配置 MCP（可选）
+以 Cherry Studio 为例，配置 MCP 并连接到 Zenfeed，见 [Cherry Studio MCP](docs/cherry-studio-mcp.md)
+> 默认地址 http://localhost:1301/sse
+
+## Roadmap
+* P0（大概率会做）
+  * 支持生成播客，男女对话，类似 NotebookLM
+  * 更多数据源
+    * 邮件
+    * 网页剪藏 Chrome 插件
+* P1（可能）
+  * 关键词搜索
+  * 支持搜索引擎作为数据源
+  * APP？
+  * 以下是由于版权风险，暂时不推进
+    * 支持 Webhook 通知
+    * 爬虫
+
+> 进展会第一时间在 [Linux Do](https://linux.do/u/ajd/summary) 更新
+
+## 有任何问题与反馈，欢迎加群讨论
+
+<img src="docs/images/wechat.png" alt="Wechat" width="150">
+
+都看到这里了，顺手点个 Star ⭐️ 呗，用于防止我太监掉
+
+## 注意
+* 1.0 版本之前不保证兼容性
+* 项目采用 AGPL3 协议，任何 Fork 都需要开源
+* 商用请联系报备，可提供合理范围内的支持。注意是合法商用哦，不欢迎搞灰色
+* 数据不会永久保存，默认只存储 8 天
+
+## 免责声明 (Disclaimer)
+
+**在使用 `zenfeed` 软件（以下简称“本软件”）前，请仔细阅读并理解本免责声明。您的下载、安装、使用本软件或任何相关服务的行为，即表示您已阅读、理解并同意接受本声明的所有条款。如果您不同意本声明的任何内容，请立即停止使用本软件。**
+
+1.  **“按原样”提供:** 本软件按“现状”和“可用”的基础提供，不附带任何形式的明示或默示担保。项目作者和贡献者不对本软件的适销性、特定用途适用性、非侵权性、准确性、完整性、可靠性、安全性、及时性或性能做出任何保证或陈述。
+
+2.  **用户责任:** 您将对使用本软件的所有行为承担全部责任。这包括但不限于：
+    *   **数据源选择:** 您自行负责选择并配置要接入的数据源（如 RSS feeds、未来可能的 Email 源等）。您必须确信您有权访问和处理这些数据源的内容，并遵守其各自的服务条款、版权政策及相关法律法规。
+    *   **内容合规性:** 您不得使用本软件处理、存储或分发任何非法、侵权、诽谤、淫秽或其他令人反感的内容。
+    *   **API密钥和凭证安全:** 您负责保护您配置到本软件中的任何 API 密钥、密码或其他凭证的安全。因您未能妥善保管而导致的任何损失或损害，项目作者和贡献者概不负责。
+    *   **配置和使用:** 您负责正确配置和使用本软件的功能，包括内容处理管道、过滤规则、通知设置等。
+
+3.  **第三方内容与服务:** 本软件可能集成或依赖第三方数据源、服务（如 RSSHub、LLM 提供商、SMTP 服务商等）。项目作者和贡献者不对这些第三方内容或服务的可用性、准确性、合法性、安全性或其服务条款负责。您与这些第三方的互动受其各自条款和政策的约束。通过本软件访问或处理的第三方内容（包括原始文章、摘要、分类、评分等）的版权归原始权利人所有，您应自行承担因使用这些内容而可能产生的法律责任。
+
+4.  **无内容处理保证:** 本软件使用大型语言模型（LLM）等技术对内容进行处理（如摘要、分类、评分、过滤）。这些处理结果可能不准确、不完整或存在偏差。项目作者和贡献者不对任何基于这些处理结果做出的决策或行动负责。语义搜索结果的准确性也受多种因素影响，不作保证。
+
+5.  **无间接或后果性损害赔偿:** 在任何情况下，无论基于何种法律理论（合同、侵权或其他），项目作者和贡献者均不对因使用或无法使用本软件而导致的任何直接、间接、偶然、特殊、惩戒性或后果性损害负责，包括但不限于利润损失、数据丢失、商誉损失、业务中断或其他商业损害或损失，即使已被告知可能发生此类损害。
+
+6.  **开源软件:** 本软件根据 AGPLv3 许可证授权。您有责任理解并遵守该许可证的条款。
+
+7.  **非法律建议:** 本免责声明不构成法律建议。如果您对使用本软件的法律影响有任何疑问，应咨询合格的法律专业人士。
+
+8.  **修改与接受:** 项目作者保留随时修改本免责声明的权利。继续使用本软件将被视为接受修改后的条款。
+
+**请再次注意：使用本软件抓取、处理和分发受版权保护的内容可能存在法律风险。用户有责任确保其使用行为符合所有适用的法律法规和第三方服务条款。对于任何因用户滥用或不当使用本软件而引起的法律纠纷或损失，项目作者和贡献者不承担任何责任。**
+

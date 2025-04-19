@@ -1,0 +1,25 @@
+timezone: Asia/Shanghai
+llms:
+  - name: general
+    default: true
+    provider: siliconflow
+    model: Qwen/Qwen2.5-32B-Instruct
+  - name: embed
+    provider: siliconflow
+    embedding_model: Pro/BAAI/bge-m3
+scrape:
+  rsshub_endpoint: http://rsshub:1200
+storage:
+  feed:
+    rewrites:
+      - transform:
+          to_text:
+            prompt: |
+              {{ .summary_html_snippet }}
+        label: summary_html_snippet
+    embedding_llm: embed
+notify:
+  channels:
+    email:
+      feed_html_snippet_template: |
+        {{ .summary_html_snippet }}
