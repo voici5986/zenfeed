@@ -1,4 +1,7 @@
 ## 项目介绍
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/glidea/zenfeed)](https://goreportcard.com/report/github.com/glidea/zenfeed)
+
 zenfeed 是你的智能信息助手。它自动收集、筛选并总结关注的新闻或话题，然后发送给你。但我们可不是又造了一个 "今日头条"... 🤔
 
 ![Zenfeed](docs/images/arch.png)
@@ -72,24 +75,23 @@ docker run --rm \
   mikefarah/yq -c '
     set -e
     mkdir -p zenfeed/config && cd zenfeed
-
     TEMPLATE_URL="https://raw.githubusercontent.com/glidea/zenfeed/main/install/config-template.yaml"
     COMPOSE_URL="https://raw.githubusercontent.com/glidea/zenfeed/main/install/docker-compose.yml"
     CONFIG_OUTPUT="config/config.yaml"
     COMPOSE_OUTPUT="docker-compose.yml"
 
-    curl -sfL "$TEMPLATE_URL" | yq \
-        '.timezone = "Asia/Shanghai" |
-          .llms[0].provider = siliconflow |
-          .llms[0].model = Qwen/Qwen2.5-32B-Instruct |
-          .llms[0].api_key = your_api_key | # 替换！！！其它参数按需选择
-          .llms[1].provider = siliconflow |
-          .llms[1].embedding_model = Pro/BAAI/bge-m3 |
-          .llms[1].api_key = your_api_key | # 替换！！！
-          .storage.feed.rewrites[0].transform.to_text.prompt = {{.summary_html_snippet}}使用中文回复' \
+    wget -qO- "$TEMPLATE_URL" | yq \
+        ".timezone = \"Asia/Shanghai\" |
+          .llms[0].provider = \"siliconflow\" |
+          .llms[0].model = \"Qwen/Qwen2.5-7B-Instruct\" |
+          .llms[0].api_key = \"your_api_key\" | # <<<--- 替换 API Key! 其它参数按需选择
+          .llms[1].provider = \"siliconflow\" |
+          .llms[1].embedding_model = \"Pro/BAAI/bge-m3\" |
+          .llms[1].api_key = \"your_api_key\" | # <<<--- 替换 API Key!
+          .storage.feed.rewrites[0].transform.to_text.prompt = \"{{.summary_html_snippet}}使用中文回复\"" \
         > "$CONFIG_OUTPUT"
 
-    curl -sfL "$COMPOSE_URL" -o "$COMPOSE_OUTPUT"
+    wget -qO "$COMPOSE_OUTPUT" "$COMPOSE_URL"
 ' && cd zenfeed && docker compose up -d --wait
 ```
 
@@ -101,26 +103,25 @@ docker run --rm `
   -w /app `
   --entrypoint sh `
   mikefarah/yq -c '
-    set -e;
-    mkdir -p zenfeed/config && cd zenfeed;
+    set -e
+    mkdir -p zenfeed/config && cd zenfeed
+    TEMPLATE_URL="https://raw.githubusercontent.com/glidea/zenfeed/main/install/config-template.yaml"
+    COMPOSE_URL="https://raw.githubusercontent.com/glidea/zenfeed/main/install/docker-compose.yml"
+    CONFIG_OUTPUT="config/config.yaml"
+    COMPOSE_OUTPUT="docker-compose.yml"
 
-    TEMPLATE_URL="https://raw.githubusercontent.com/glidea/zenfeed/main/install/config-template.yaml";
-    COMPOSE_URL="https://raw.githubusercontent.com/glidea/zenfeed/main/install/docker-compose.yml";
-    CONFIG_OUTPUT="config/config.yaml";
-    COMPOSE_OUTPUT="docker-compose.yml";
+    wget -qO- "$TEMPLATE_URL" | yq \
+        ".timezone = \"Asia/Shanghai\" |
+          .llms[0].provider = \"siliconflow\" |
+          .llms[0].model = \"Qwen/Qwen2.5-7B-Instruct\" |
+          .llms[0].api_key = \"your_api_key\" | # <<<--- 替换 API Key! 其它参数按需选择
+          .llms[1].provider = \"siliconflow\" |
+          .llms[1].embedding_model = \"Pro/BAAI/bge-m3\" |
+          .llms[1].api_key = \"your_api_key\" | # <<<--- 替换 API Key!
+          .storage.feed.rewrites[0].transform.to_text.prompt = \"{{.summary_html_snippet}}使用中文回复\"" \
+        > "$CONFIG_OUTPUT"
 
-    curl -sfL "$TEMPLATE_URL" | yq `
-        ''.timezone = "Asia/Shanghai" |
-          .llms[0].provider = "siliconflow" |
-          .llms[0].model = "Qwen/Qwen2.5-32B-Instruct" |
-          .llms[0].api_key = "your_api_key" | # 替换！！！其它参数按需选择
-          .llms[1].provider = "siliconflow" |
-          .llms[1].embedding_model = "Pro/BAAI/bge-m3" |
-          .llms[1].api_key = "your_api_key" | # 替换！！！
-          .storage.feed.rewrites[0].transform.to_text.prompt = "{{.summary_html_snippet}}使用中文回复"'' `
-        > "$CONFIG_OUTPUT";
-
-    curl -sfL "$COMPOSE_URL" -o "$COMPOSE_OUTPUT";
+    wget -qO "$COMPOSE_OUTPUT" "$COMPOSE_URL"
 ' ; cd zenfeed; docker compose up -d --wait
 ```
 

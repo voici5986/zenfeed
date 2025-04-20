@@ -3,7 +3,7 @@ llms:
   - name: general
     default: true
     provider: siliconflow
-    model: Qwen/Qwen2.5-32B-Instruct
+    model: Qwen/Qwen2.5-7B-Instruct
   - name: embed
     provider: siliconflow
     embedding_model: Pro/BAAI/bge-m3

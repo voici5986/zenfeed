@@ -48,6 +48,10 @@ type Email struct {
 	feedHTMLSnippetTemplate *template.Template
 }
 
+func (c *Email) Enabled() bool {
+	return c != nil && c.SmtpEndpoint != ""
+}
+
 func (c *Email) Validate() error {
 	if c.SmtpEndpoint == "" {
 		return errors.New("email.smtp_endpoint is required")

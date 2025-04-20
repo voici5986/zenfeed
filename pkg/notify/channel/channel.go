@@ -41,7 +41,7 @@ type Config struct {
 }
 
 func (c *Config) Validate() error {
-	if c.Email != nil {
+	if c.Email.Enabled() {
 		if err := c.Email.Validate(); err != nil {
 			return errors.Wrap(err, "validate email")
 		}
@@ -56,9 +56,6 @@ type Receiver struct {
 }
 
 func (r *Receiver) Validate() error {
-	if r.Email == "" && r.Webhook == nil {
-		return errors.New("email or webhook is required")
-	}
 	if r.Email != "" && r.Webhook != nil {
 		return errors.New("email and webhook cannot both be set")
 	}
@@ -97,7 +94,7 @@ func new(instance string, config *Config, dependencies Dependencies) (Channel, e
 	}
 
 	var email sender
-	if config.Email != nil {
+	if config.Email.Enabled() {
 		var err error
 		email, err = newEmail(config.Email, dependencies)
 		if err != nil {
