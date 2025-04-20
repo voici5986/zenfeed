@@ -141,7 +141,7 @@ docker run --rm `
 
 <img src="docs/images/notification-with-web.png" alt="" width="400">
 
-### 2. 配置 MCP（可选）
+### 3. 配置 MCP（可选）
 以 Cherry Studio 为例，配置 MCP 并连接到 Zenfeed，见 [Cherry Studio MCP](docs/cherry-studio-mcp.md)
 > 默认地址 http://localhost:1301/sse
 
