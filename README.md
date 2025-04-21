@@ -69,7 +69,7 @@ zenfeed 是你的智能信息助手。它自动收集、筛选并总结关注的
 
 ```bash
 docker run --rm \
-  -v "$(PWD):/app" \
+  -v "$(pwd):/app" \
   -w /app \
   --entrypoint sh \
   mikefarah/yq -c '
