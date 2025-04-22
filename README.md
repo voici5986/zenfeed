@@ -59,83 +59,42 @@ zenfeed 是你的智能信息助手。它自动收集、筛选并总结关注的
 
 ### 1. 安装
 
-替换下方 APIKey 等参数，并完整复制到终端一键执行。注意：
+默认使用硅基流动的 Qwen/Qwen2.5-7B-Instruct(免费) 和 Pro/BAAI/bge-m3。如果你还没有硅基账号，使用 [邀请链接](https://cloud.siliconflow.cn/i/U2VS0Q5A) 得 14 元额度
 
-1. `provider` 除了硅基还支持 openai, openrouter, deepseek, gemini, volc（火山(keng)引擎）。也可自定义，参考 [配置文档](docs/config-zh.md)。需要自定义其它参数的大佬也可参考
-
-2. `llms[0].model` 默认会用来总结内容，相对耗费 Token，一般 Qwen/Qwen2.5-7B-Instruct（免费！！！）足够，当然米够的话越强越好。如果你还没有硅基账号，使用 [邀请链接](https://cloud.siliconflow.cn/i/U2VS0Q5A) 得 14 元额度
+支持使用其他厂商或模型，按下方提示操作即可
 
 #### Mac/Linux
 
 ```bash
-docker run --rm \
-  -v "$(pwd):/app" \
-  -w /app \
-  --entrypoint sh \
-  mikefarah/yq -c '
-    set -e
-    mkdir -p zenfeed/config && cd zenfeed
-    TEMPLATE_URL="https://raw.githubusercontent.com/glidea/zenfeed/main/install/config-template.yaml"
-    COMPOSE_URL="https://raw.githubusercontent.com/glidea/zenfeed/main/install/docker-compose.yml"
-    CONFIG_OUTPUT="config/config.yaml"
-    COMPOSE_OUTPUT="docker-compose.yml"
+curl -L -O https://raw.githubusercontent.com/glidea/zenfeed/main/docker-compose.yml
 
-    wget -qO- "$TEMPLATE_URL" | yq \
-        ".timezone = \"Asia/Shanghai\" |
-          .llms[0].provider = \"siliconflow\" |
-          .llms[0].model = \"Qwen/Qwen2.5-7B-Instruct\" |
-          .llms[0].api_key = \"your_api_key\" | # <<<--- 替换 API Key! 其它参数按需选择
-          .llms[1].provider = \"siliconflow\" |
-          .llms[1].embedding_model = \"Pro/BAAI/bge-m3\" |
-          .llms[1].api_key = \"your_api_key\" | # <<<--- 替换 API Key!
-          .storage.feed.rewrites[0].transform.to_text.prompt = \"{{.summary_html_snippet}}使用中文回复\"" \
-        > "$CONFIG_OUTPUT"
-
-    wget -qO "$COMPOSE_OUTPUT" "$COMPOSE_URL"
-' && cd zenfeed && docker compose up -d --wait
+# 如果你需要自定义更多配置参数，请直接编辑（执行下方命令前） docker-compose.yml#configs.zenfeed_config.content
+# 配置文档 https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md
+API_KEY=your_apikey docker-compose up -d
 ```
 
 #### Windows
 > 使用 PowerShell 执行
 ```powershell
-docker run --rm `
-  -v "${PWD}:/app" `
-  -w /app `
-  --entrypoint sh `
-  mikefarah/yq -c '
-    set -e
-    mkdir -p zenfeed/config && cd zenfeed
-    TEMPLATE_URL="https://raw.githubusercontent.com/glidea/zenfeed/main/install/config-template.yaml"
-    COMPOSE_URL="https://raw.githubusercontent.com/glidea/zenfeed/main/install/docker-compose.yml"
-    CONFIG_OUTPUT="config/config.yaml"
-    COMPOSE_OUTPUT="docker-compose.yml"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/glidea/zenfeed/main/docker-compose.yml" -OutFile ([System.IO.Path]::GetFileName("https://raw.githubusercontent.com/glidea/zenfeed/main/docker-compose.yml"))
 
-    wget -qO- "$TEMPLATE_URL" | yq \
-        ".timezone = \"Asia/Shanghai\" |
-          .llms[0].provider = \"siliconflow\" |
-          .llms[0].model = \"Qwen/Qwen2.5-7B-Instruct\" |
-          .llms[0].api_key = \"your_api_key\" | # <<<--- 替换 API Key! 其它参数按需选择
-          .llms[1].provider = \"siliconflow\" |
-          .llms[1].embedding_model = \"Pro/BAAI/bge-m3\" |
-          .llms[1].api_key = \"your_api_key\" | # <<<--- 替换 API Key!
-          .storage.feed.rewrites[0].transform.to_text.prompt = \"{{.summary_html_snippet}}使用中文回复\"" \
-        > "$CONFIG_OUTPUT"
-
-    wget -qO "$COMPOSE_OUTPUT" "$COMPOSE_URL"
-' ; cd zenfeed; docker compose up -d --wait
+# 如果你需要自定义更多配置参数，请直接编辑（执行下方命令前） docker-compose.yml#configs.zenfeed_config.content
+# 配置文档 https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md
+$env:API_KEY = "your_apikey"; docker-compose up -d
 ```
 
 ### 2. 使用 Web 端
 
 访问 https://zenfeed-web.pages.dev
-
-> 会默认连接本地的 zenfeed
+> 如果部署在 VPS 等环境请访问 https://vps_public_ip:1400（记得开放安全组端口），不要使用上方的公共前端
+> ⚠️ zenfeed 尚无认证手段，暴露到公网可能会泄露 APIKey，请小心设置安全组。如果你有这方面的安全需求请提 Issue
 
 #### 添加 RSS 订阅源
 
 <img src="docs/images/web-add-source.png" alt="" width="400">
 
 > 从 Follow 迁移过来，参考 [migrate-from-follow.md](docs/migrate-from-follow.md)
+> 需要访问对应的源站，请保证网络畅通
 
 #### 配置每日简报，监控等
 

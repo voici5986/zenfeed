@@ -1,0 +1,63 @@
+services:
+  zenfeed-web:
+    image: glidea/zenfeed-web:latest
+    ports:
+      - "1400:1400"
+    environment:
+      - PUBLIC_DEFAULT_API_URL=http://zenfeed:1300
+    depends_on:
+      - zenfeed
+
+  zenfeed:
+    image: glidea/zenfeed:latest
+    configs:
+      - source: zenfeed_config
+        target: /app/config/config.yaml
+    volumes:
+      - data:/app/data
+    ports:
+      - "1300:1300"
+      - "1301:1301"
+    depends_on:
+      - rsshub
+
+  rsshub:
+    image: diygod/rsshub:latest
+    ports:
+      - "1200:1200"
+    environment:
+      - NODE_ENV=production
+      
+volumes:
+  data: {}
+
+configs:
+  zenfeed_config:
+    content: |
+      timezone: ${TZ:-Asia/Shanghai}
+      llms:
+        - name: general
+          default: true
+          provider: siliconflow
+          model: Qwen/Qwen2.5-7B-Instruct
+          api_key: ${API_KEY}
+        - name: embed
+          provider: siliconflow
+          embedding_model: Pro/BAAI/bge-m3
+          api_key: ${API_KEY}
+      scrape:
+        rsshub_endpoint: http://rsshub:1200
+      storage:
+        feed:
+          rewrites:
+            - transform:
+                to_text:
+                  prompt: |
+                    {{ .summary_html_snippet }} Respond in ${LANG:-Chinese}
+              label: summary_html_snippet
+          embedding_llm: embed
+      notify:
+        channels:
+          email:
+            feed_html_snippet_template: |
+              {{ .summary_html_snippet }}
