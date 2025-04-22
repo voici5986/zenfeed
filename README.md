@@ -132,6 +132,12 @@ $env:API_KEY = "your_apikey"; docker-compose up -d
 * 商用请联系报备，可提供合理范围内的支持。注意是合法商用哦，不欢迎搞灰色
 * 数据不会永久保存，默认只存储 8 天
 
+## 鸣谢
+* 感谢 [eryajf](https://github.com/eryajf) 提供的 [Compose Inline Config](https://github.com/glidea/zenfeed/issues/1) 让部署更易理解
+
+## 👏🏻 欢迎贡献
+* 目前还没有规范，只要求一点，“代码一致性”，很重要
+
 ## 免责声明 (Disclaimer)
 
 **在使用 `zenfeed` 软件（以下简称“本软件”）前，请仔细阅读并理解本免责声明。您的下载、安装、使用本软件或任何相关服务的行为，即表示您已阅读、理解并同意接受本声明的所有条款。如果您不同意本声明的任何内容，请立即停止使用本软件。**
