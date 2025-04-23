@@ -10,11 +10,23 @@ services:
 
   zenfeed:
     image: glidea/zenfeed:latest
+    entrypoint: >
+      sh -c "
+      if [ ! -f /app/config/config.yaml ]; then
+        echo 'Config file not found in volume, initializing from base config...'
+        cp /app/config.base.yaml /app/config/config.yaml;
+      else
+        echo 'Existing config file found in volume.'
+      fi &&
+      echo 'Starting Zenfeed...' &&
+      exec /app/zenfeed --config /app/config/config.yaml
+      "
     configs:
-      - source: zenfeed_config
-        target: /app/config/config.yaml
+      - source: zenfeed_config_base
+        target: /app/config.base.yaml
     volumes:
       - data:/app/data
+      - config:/app/config
     ports:
       - "1300:1300"
       - "1301:1301"
@@ -30,9 +42,10 @@ services:
       
 volumes:
   data: {}
+  config: {}
 
 configs:
-  zenfeed_config:
+  zenfeed_config_base:
     content: |
       timezone: ${TZ:-Asia/Shanghai}
       llms:
@@ -40,11 +53,11 @@ configs:
           default: true
           provider: siliconflow
           model: Qwen/Qwen2.5-7B-Instruct
-          api_key: ${API_KEY}
+          api_key: ${API_KEY:-your-api-key}
         - name: embed
           provider: siliconflow
           embedding_model: Pro/BAAI/bge-m3
-          api_key: ${API_KEY}
+          api_key: ${API_KEY:-your-api-key}
       scrape:
         rsshub_endpoint: http://rsshub:1200
       storage:

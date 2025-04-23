@@ -70,7 +70,7 @@ curl -L -O https://raw.githubusercontent.com/glidea/zenfeed/main/docker-compose.
 
 # 如果你需要自定义更多配置参数，请直接编辑（执行下方命令前） docker-compose.yml#configs.zenfeed_config.content
 # 配置文档 https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md
-API_KEY=your_apikey docker-compose up -d
+API_KEY=your_apikey docker-compose -p zenfeed up -d
 ```
 
 #### Windows
@@ -80,7 +80,7 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/glidea/zenfeed/main/do
 
 # 如果你需要自定义更多配置参数，请直接编辑（执行下方命令前） docker-compose.yml#configs.zenfeed_config.content
 # 配置文档 https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md
-$env:API_KEY = "your_apikey"; docker-compose up -d
+$env:API_KEY = "your_apikey"; docker-compose -p zenfeed up -d
 ```
 
 ### 2. 使用 Web 端
@@ -95,6 +95,7 @@ $env:API_KEY = "your_apikey"; docker-compose up -d
 
 > 从 Follow 迁移过来，参考 [migrate-from-follow.md](docs/migrate-from-follow.md)
 > 需要访问对应的源站，请保证网络畅通
+> 添加后稍等几分钟，特别模型有严格速率限制的情况下
 
 #### 配置每日简报，监控等
 
