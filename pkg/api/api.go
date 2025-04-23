@@ -138,7 +138,7 @@ type QueryRSSHubRoutesResponse struct {
 type RSSHubRoute struct {
 	Name        string         `json:"name,omitempty"`
 	Description string         `json:"description,omitempty"`
-	Path        string         `json:"path,omitempty"`
+	Path        any            `json:"path,omitempty"`
 	Example     string         `json:"example,omitempty"`
 	Parameters  map[string]any `json:"parameters,omitempty"`
 	Features    map[string]any `json:"features,omitempty"`
