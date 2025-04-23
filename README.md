@@ -1,3 +1,5 @@
+[English](README-en.md)
+
 ## 前言
 
 RSS（简易信息聚合）诞生于 Web 1.0 时代，旨在解决信息分散的问题，让用户能在一个地方聚合、追踪多个网站的更新，无需频繁访问。它将网站更新以摘要形式推送给订阅者，便于快速获取信息。
@@ -142,6 +144,10 @@ $env:API_KEY = "your_apikey"; docker-compose -p zenfeed up -d
 <img src="docs/images/wechat.png" alt="Wechat" width="150">
 
 都看到这里了，顺手点个 Star ⭐️ 呗，用于防止我太监掉
+
+喜欢本项目的话，赞助杯🧋（赛博要饭）
+
+<img src="docs/images/sponsor.png" alt="Wechat" width="150">
 
 ## 注意
 * 1.0 版本之前不保证兼容性
