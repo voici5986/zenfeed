@@ -22,7 +22,7 @@ services:
       - rsshub
 
   rsshub:
-    image: diygod/rsshub:latest
+    image: diygod/rsshub:2024-12-14
     ports:
       - "1200:1200"
     environment:
