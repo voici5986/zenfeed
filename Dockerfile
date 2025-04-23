@@ -6,10 +6,12 @@ WORKDIR /app
 COPY . .
 
 ARG VERSION=dev
-LABEL org.opencontainers.image.version=${VERSION}
 RUN GOOS=linux go build -ldflags="-s -w -X main.version=${VERSION}" -o /app/zenfeed ./main.go
 
 FROM alpine:latest
+
+ARG VERSION=dev
+LABEL org.opencontainers.image.version=${VERSION}
 
 RUN apk add --no-cache ca-certificates tzdata && \
     mkdir -p /app/data
