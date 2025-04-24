@@ -1,3 +1,5 @@
+zenfeed: Empower RSS with AI, automatically filter, summarize, and push important information for you, say goodbye to information overload, and regain control of reading.
+
 ## Preface
 
 RSS (Really Simple Syndication) was born in the Web 1.0 era to solve the problem of information fragmentation, allowing users to aggregate and track updates from multiple websites in one place without frequent visits. It pushes website updates in summary form to subscribers for quick information access.
