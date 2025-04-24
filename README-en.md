@@ -16,6 +16,8 @@ Try zenfeed! **AI + RSS** might be a better way to acquire information in this e
 
 ## Project Introduction
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/1b51f1087558402d85496fbe7bddde89)](https://app.codacy.com/gh/glidea/zenfeed/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=glidea_zenfeed&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=glidea_zenfeed)
 [![Go Report Card](https://goreportcard.com/badge/github.com/glidea/zenfeed)](https://goreportcard.com/report/github.com/glidea/zenfeed)
 
 zenfeed is your intelligent information assistant. It automatically collects, filters, and summarizes news or topics you follow, then sends them to you. But we're not just building another "Toutiao"... 🤔

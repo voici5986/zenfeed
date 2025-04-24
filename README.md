@@ -20,6 +20,8 @@ RSS（简易信息聚合）诞生于 Web 1.0 时代，旨在解决信息分散�
 
 ## 项目介绍
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/1b51f1087558402d85496fbe7bddde89)](https://app.codacy.com/gh/glidea/zenfeed/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=glidea_zenfeed&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=glidea_zenfeed)
 [![Go Report Card](https://goreportcard.com/badge/github.com/glidea/zenfeed)](https://goreportcard.com/report/github.com/glidea/zenfeed)
 
 zenfeed 是你的智能信息助手。它自动收集、筛选并总结关注的新闻或话题，然后发送给你。但我们可不是又造了一个 "今日头条"... 🤔
