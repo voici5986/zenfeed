@@ -76,19 +76,19 @@ zenfeed 是你的智能信息助手。它自动收集、筛选并总结关注的
 ## 安装与使用
 
 ### 1. 安装
+> 最快 1min 拉起
 
 默认使用硅基流动的 Qwen/Qwen2.5-7B-Instruct(免费) 和 Pro/BAAI/bge-m3。如果你还没有硅基账号，使用 [邀请链接](https://cloud.siliconflow.cn/i/U2VS0Q5A) 得 14 元额度
 
-支持使用其他厂商或模型，按下方提示操作即可
+如果需要使用其他厂商或模型，或自定义部署：请编辑下方 **docker-compose.yml**#configs.zenfeed_config.content.
+参考 [配置文档](https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md)
 
 #### Mac/Linux
 
 ```bash
 curl -L -O https://raw.githubusercontent.com/glidea/zenfeed/main/docker-compose.yml
 
-# 如果你需要自定义更多配置参数，请直接编辑（执行下方命令前） docker-compose.yml#configs.zenfeed_config.content
-# 配置文档 https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md
-API_KEY=your_apikey docker-compose -p zenfeed up -d
+API_KEY=硅基流动apikey docker-compose -p zenfeed up -d
 ```
 
 #### Windows
@@ -96,14 +96,13 @@ API_KEY=your_apikey docker-compose -p zenfeed up -d
 ```powershell
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/glidea/zenfeed/main/docker-compose.yml" -OutFile ([System.IO.Path]::GetFileName("https://raw.githubusercontent.com/glidea/zenfeed/main/docker-compose.yml"))
 
-# 如果你需要自定义更多配置参数，请直接编辑（执行下方命令前） docker-compose.yml#configs.zenfeed_config.content
-# 配置文档 https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md
-$env:API_KEY = "your_apikey"; docker-compose -p zenfeed up -d
+$env:API_KEY = "硅基流动apikey"; docker-compose -p zenfeed up -d
 ```
+
+安装完成！访问 https://zenfeed-web.pages.dev
 
 ### 2. 使用 Web 端
 
-访问 https://zenfeed-web.pages.dev
 > 如果部署在 VPS 等环境请访问 https://vps_public_ip:1400（记得开放安全组端口），不要使用上方的公共前端
 > ⚠️ zenfeed 尚无认证手段，暴露到公网可能会泄露 APIKey，请小心设置安全组。如果你有这方面的安全需求请提 Issue
 
