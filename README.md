@@ -150,6 +150,8 @@ $env:API_KEY = "硅基流动apikey"; docker-compose -p zenfeed up -d
 
 都看到这里了，顺手点个 Star ⭐️ 呗，用于防止我太监掉
 
+有好玩的 AI 工作请联系我！
+
 喜欢本项目的话，赞助杯🧋（赛博要饭）
 
 <img src="docs/images/sponsor.png" alt="Wechat" width="150">
