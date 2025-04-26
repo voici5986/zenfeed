@@ -2,7 +2,7 @@
 
 zenfeed：用 AI 赋能 RSS，自动为你筛选、总结、推送重要信息，告别信息过载，重拾阅读掌控感。
 
-试用 Demo 站即将来袭！Watch 项目可实时接收 Release 通知
+开箱即用的公共服务站：https://zenfeed.xyz
 
 ## 前言
 
