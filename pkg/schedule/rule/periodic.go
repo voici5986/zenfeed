@@ -77,7 +77,7 @@ func (r *periodic) Run() (err error) {
 			return nil
 		case now := <-tick.C:
 			iter(now)
-			tick.Reset(3 * time.Minute)
+			tick.Reset(5 * time.Minute)
 		}
 	}
 }

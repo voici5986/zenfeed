@@ -145,6 +145,9 @@ type SchedulsRule struct {
 type NotifyRoute struct {
 	Receivers                  []string         `yaml:"receivers,omitempty" json:"receivers,omitempty" desc:"The notify receivers. It is required, at least one receiver is needed."`
 	GroupBy                    []string         `yaml:"group_by,omitempty" json:"group_by,omitempty" desc:"The group by config to group the feeds, each group will be notified individually. It is required, at least one group by is needed."`
+	SourceLabel                string           `yaml:"source_label,omitempty" json:"source_label,omitempty" desc:"The source label to extract the content from each feed, and summarize them. Default are all labels. It is very recommended to set it to 'summary' to reduce context length."`
+	SummaryPrompt              string           `yaml:"summary_prompt,omitempty" json:"summary_prompt,omitempty" desc:"The prompt to summarize the feeds of each group."`
+	LLM                        string           `yaml:"llm,omitempty" json:"llm,omitempty" desc:"The LLM name to use. Default is the default LLM in llms section. A large context length LLM is recommended."`
 	CompressByRelatedThreshold *float32         `yaml:"compress_by_related_threshold,omitempty" json:"compress_by_related_threshold,omitempty" desc:"The threshold to compress the feeds by relatedness, that is, if the feeds are too similar, only one will be notified. Default is 0.85."`
 	SubRoutes                  []NotifySubRoute `yaml:"sub_routes,omitempty" json:"sub_routes,omitempty" desc:"The sub routes to notify the feeds. A feed prefers to be matched by the sub routes, if not matched, it will be matched by the parent route."`
 }
@@ -154,6 +157,9 @@ type NotifySubRoute struct {
 
 	Receivers                  []string         `yaml:"receivers,omitempty" json:"receivers,omitempty" desc:"The notify receivers. It is required, at least one receiver is needed."`
 	GroupBy                    []string         `yaml:"group_by,omitempty" json:"group_by,omitempty" desc:"The group by config to group the feeds, each group will be notified individually. It is required, at least one group by is needed."`
+	SourceLabel                string           `yaml:"source_label,omitempty" json:"source_label,omitempty" desc:"The source label to extract the content from each feed, and summarize them. Default are all labels. It is very recommended to set it to 'summary' to reduce context length."`
+	SummaryPrompt              string           `yaml:"summary_prompt,omitempty" json:"summary_prompt,omitempty" desc:"The prompt to summarize the feeds of each group."`
+	LLM                        string           `yaml:"llm,omitempty" json:"llm,omitempty" desc:"The LLM name to use. Default is the default LLM in llms section. A large context length LLM is recommended."`
 	CompressByRelatedThreshold *float32         `yaml:"compress_by_related_threshold,omitempty" json:"compress_by_related_threshold,omitempty" desc:"The threshold to compress the feeds by relatedness, that is, if the feeds are too similar, only one will be notified. Default is 0.85."`
 	SubRoutes                  []NotifySubRoute `yaml:"sub_routes,omitempty" json:"sub_routes,omitempty" desc:"The sub routes to notify the feeds. A feed prefers to be matched by the sub routes, if not matched, it will be matched by the parent route."`
 }

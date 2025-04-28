@@ -607,8 +607,11 @@ func (s *storage) rewrite(ctx context.Context, feeds []*model.Feed) ([]*model.Fe
 		}(item)
 	}
 	wg.Wait()
-	if len(errs) > 0 {
+	if allFailed := len(errs) == len(feeds); allFailed {
 		return nil, errs[0]
+	}
+	if len(errs) > 0 {
+		log.Error(ctx, errors.Wrap(errs[0], "rewrite feeds"), "error_count", len(errs))
 	}
 
 	return rewritten, nil

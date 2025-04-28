@@ -1,6 +1,7 @@
 package route
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"k8s.io/utils/ptr"
 
 	"github.com/glidea/zenfeed/pkg/component"
+	"github.com/glidea/zenfeed/pkg/llm"
 	"github.com/glidea/zenfeed/pkg/model"
 	"github.com/glidea/zenfeed/pkg/schedule/rule"
 	"github.com/glidea/zenfeed/pkg/storage/feed/block"
@@ -382,6 +384,11 @@ func TestRoute(t *testing.T) {
 				tt.GivenDetail.relatedScore(&mockDep.Mock)
 			}
 
+			llmFactory, err := llm.NewFactory("", nil, llm.FactoryDependencies{}, component.MockOption(func(m *mock.Mock) {
+				m.On("String", mock.Anything, mock.Anything).Return("test", nil)
+			}))
+			Expect(err).NotTo(HaveOccurred())
+
 			routerInstance := &router{
 				Base: component.New(&component.BaseConfig[Config, Dependencies]{
 					Name:     "TestRouter",
@@ -389,11 +396,12 @@ func TestRoute(t *testing.T) {
 					Config:   tt.GivenDetail.config,
 					Dependencies: Dependencies{
 						RelatedScore: mockDep.RelatedScore,
+						LLMFactory:   llmFactory,
 					},
 				}),
 			}
 
-			groups, err := routerInstance.Route(tt.WhenDetail.ruleResult)
+			groups, err := routerInstance.Route(context.Background(), tt.WhenDetail.ruleResult)
 
 			if tt.ThenExpected.isErr {
 				Expect(err).To(HaveOccurred())

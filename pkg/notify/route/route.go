@@ -16,6 +16,8 @@
 package route
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
@@ -25,16 +27,20 @@ import (
 	"k8s.io/utils/ptr"
 
 	"github.com/glidea/zenfeed/pkg/component"
+	"github.com/glidea/zenfeed/pkg/llm"
 	"github.com/glidea/zenfeed/pkg/model"
 	"github.com/glidea/zenfeed/pkg/schedule/rule"
 	"github.com/glidea/zenfeed/pkg/storage/feed/block"
+	"github.com/glidea/zenfeed/pkg/telemetry"
+	telemetrymodel "github.com/glidea/zenfeed/pkg/telemetry/model"
+	runtimeutil "github.com/glidea/zenfeed/pkg/util/runtime"
 	timeutil "github.com/glidea/zenfeed/pkg/util/time"
 )
 
 // --- Interface code block ---
 type Router interface {
 	component.Component
-	Route(result *rule.Result) (groups []*Group, err error)
+	Route(ctx context.Context, result *rule.Result) (groups []*Group, err error)
 }
 
 type Config struct {
@@ -43,6 +49,9 @@ type Config struct {
 
 type Route struct {
 	GroupBy                    []string
+	SourceLabel                string
+	SummaryPrompt              string
+	LLM                        string
 	CompressByRelatedThreshold *float32
 	Receivers                  []string
 	SubRoutes                  SubRoutes
@@ -158,6 +167,7 @@ func (c *Config) Validate() error {
 
 type Dependencies struct {
 	RelatedScore func(a, b [][]float32) (float32, error) // MUST same with vector index.
+	LLMFactory   llm.Factory
 }
 
 type Group struct {
@@ -166,10 +176,11 @@ type Group struct {
 }
 
 type FeedGroup struct {
-	Name   string
-	Time   time.Time
-	Labels model.Labels
-	Feeds  []*Feed
+	Name    string
+	Time    time.Time
+	Labels  model.Labels
+	Feeds   []*Feed
+	Summary string
 }
 
 func (g *FeedGroup) ID() string {
@@ -216,7 +227,10 @@ type router struct {
 	*component.Base[Config, Dependencies]
 }
 
-func (r *router) Route(result *rule.Result) (groups []*Group, err error) {
+func (r *router) Route(ctx context.Context, result *rule.Result) (groups []*Group, err error) {
+	ctx = telemetry.StartWith(ctx, append(r.TelemetryLabels(), telemetrymodel.KeyOperation, "Route")...)
+	defer func() { telemetry.End(ctx, err) }()
+
 	// Find route for each feed.
 	feedsByRoute := r.routeFeeds(result.Feeds)
 
@@ -233,12 +247,21 @@ func (r *router) Route(result *rule.Result) (groups []*Group, err error) {
 
 		// Build final groups.
 		for ls, feeds := range relatedGroups {
+			var summary string
+			if prompt := route.SummaryPrompt; prompt != "" && len(feeds) > 1 {
+				// TODO: Avoid potential for duplicate generation.
+				summary, err = r.generateSummary(ctx, prompt, feeds, route.SourceLabel)
+				if err != nil {
+					return nil, errors.Wrap(err, "generate summary")
+				}
+			}
 			groups = append(groups, &Group{
 				FeedGroup: FeedGroup{
-					Name:   fmt.Sprintf("%s  %s", result.Rule, ls.String()),
-					Time:   result.Time,
-					Labels: *ls,
-					Feeds:  feeds,
+					Name:    fmt.Sprintf("%s  %s", result.Rule, ls.String()),
+					Time:    result.Time,
+					Labels:  *ls,
+					Feeds:   feeds,
+					Summary: summary,
 				},
 				Receivers: route.Receivers,
 			})
@@ -250,6 +273,38 @@ func (r *router) Route(result *rule.Result) (groups []*Group, err error) {
 	})
 
 	return groups, nil
+}
+
+func (r *router) generateSummary(ctx context.Context, prompt string, feeds []*Feed, sourceLabel string) (string, error) {
+	content := r.parseContentToSummary(feeds, sourceLabel)
+	if content == "" {
+		return "", nil
+	}
+
+	llm := r.Dependencies().LLMFactory.Get(r.Config().LLM)
+	summary, err := llm.String(ctx, []string{
+		content,
+		prompt,
+	})
+	if err != nil {
+		return "", errors.Wrap(err, "llm string")
+	}
+
+	return summary, nil
+}
+
+func (r *router) parseContentToSummary(feeds []*Feed, sourceLabel string) string {
+	if sourceLabel == "" {
+		b := runtimeutil.Must1(json.Marshal(feeds))
+		return string(b)
+	}
+
+	var sb strings.Builder
+	for _, feed := range feeds {
+		sb.WriteString(feed.Labels.Get(sourceLabel))
+	}
+
+	return sb.String()
 }
 
 func (r *router) routeFeeds(feeds []*block.FeedVO) map[*Route][]*block.FeedVO {
@@ -288,6 +343,12 @@ func (r *router) groupFeedsByLabels(route *Route, feeds []*block.FeedVO) map[*mo
 		}
 
 		groupedFeeds[labelGroup] = append(groupedFeeds[labelGroup], feed)
+	}
+
+	for _, feeds := range groupedFeeds {
+		sort.Slice(feeds, func(i, j int) bool {
+			return feeds[i].ID < feeds[j].ID
+		})
 	}
 
 	return groupedFeeds
@@ -344,6 +405,16 @@ func (r *router) compressRelatedFeedsForGroup(
 		}
 	}
 
+	// Sort.
+	sort.Slice(feedsWithRelated, func(i, j int) bool {
+		return feedsWithRelated[i].ID < feedsWithRelated[j].ID
+	})
+	for _, feed := range feedsWithRelated {
+		sort.Slice(feed.Related, func(i, j int) bool {
+			return feed.Related[i].ID < feed.Related[j].ID
+		})
+	}
+
 	return feedsWithRelated, nil
 }
 
@@ -351,8 +422,8 @@ type mockRouter struct {
 	component.Mock
 }
 
-func (m *mockRouter) Route(result *rule.Result) (groups []*Group, err error) {
-	m.Called(result)
+func (m *mockRouter) Route(ctx context.Context, result *rule.Result) (groups []*Group, err error) {
+	m.Called(ctx, result)
 
 	return groups, err
 }

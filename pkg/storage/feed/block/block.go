@@ -523,9 +523,9 @@ type block struct {
 	coldLoaded     bool
 }
 
-func (b *block) Run() error {
+func (b *block) Run() (err error) {
 	ctx := telemetry.StartWith(b.Context(), append(b.TelemetryLabels(), telemetrymodel.KeyOperation, "Run")...)
-	defer func() { telemetry.End(ctx, nil) }()
+	defer func() { telemetry.End(ctx, err) }()
 
 	// Maintain metrics.
 	go b.maintainMetrics(ctx)
@@ -715,9 +715,9 @@ func (b *block) Query(ctx context.Context, query QueryOptions) (feeds []*FeedVO,
 	return result.Slice(), nil
 }
 
-func (b *block) Exists(ctx context.Context, id uint64) (bool, error) {
+func (b *block) Exists(ctx context.Context, id uint64) (exists bool, err error) {
 	ctx = telemetry.StartWith(ctx, append(b.TelemetryLabels(), telemetrymodel.KeyOperation, "Exists")...)
-	defer func() { telemetry.End(ctx, nil) }()
+	defer func() { telemetry.End(ctx, err) }()
 
 	// Ensure the block is loaded.
 	if err := b.ensureLoaded(ctx); err != nil {

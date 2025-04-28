@@ -355,6 +355,7 @@ func (a *App) setupNotifier() (err error) {
 		RouterFactory:  route.NewFactory(),
 		ChannelFactory: channel.NewFactory(),
 		KVStorage:      a.kvStorage,
+		LLMFactory:     a.llmFactory,
 	})
 	if err != nil {
 		return err

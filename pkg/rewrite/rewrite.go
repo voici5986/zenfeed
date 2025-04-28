@@ -465,9 +465,9 @@ func (r *rewriter) Reload(app *config.App) error {
 	return nil
 }
 
-func (r *rewriter) Labels(ctx context.Context, labels model.Labels) (model.Labels, error) {
+func (r *rewriter) Labels(ctx context.Context, labels model.Labels) (rewritten model.Labels, err error) {
 	ctx = telemetry.StartWith(ctx, append(r.TelemetryLabels(), telemetrymodel.KeyOperation, "Labels")...)
-	defer func() { telemetry.End(ctx, nil) }()
+	defer func() { telemetry.End(ctx, err) }()
 
 	rules := *r.Config()
 	for _, rule := range rules {

@@ -27,6 +27,7 @@ import (
 
 	"github.com/glidea/zenfeed/pkg/component"
 	"github.com/glidea/zenfeed/pkg/config"
+	"github.com/glidea/zenfeed/pkg/llm"
 	"github.com/glidea/zenfeed/pkg/notify/channel"
 	"github.com/glidea/zenfeed/pkg/notify/route"
 	"github.com/glidea/zenfeed/pkg/schedule/rule"
@@ -67,6 +68,9 @@ func (c *Config) From(app *config.App) *Config {
 	c.Route = route.Config{
 		Route: route.Route{
 			GroupBy:                    app.Notify.Route.GroupBy,
+			SourceLabel:                app.Notify.Route.SourceLabel,
+			SummaryPrompt:              app.Notify.Route.SummaryPrompt,
+			LLM:                        app.Notify.Route.LLM,
 			CompressByRelatedThreshold: app.Notify.Route.CompressByRelatedThreshold,
 			Receivers:                  app.Notify.Route.Receivers,
 		},
@@ -105,6 +109,9 @@ func convertSubRoute(from *config.NotifySubRoute) *route.SubRoute {
 	to := &route.SubRoute{
 		Route: route.Route{
 			GroupBy:                    from.GroupBy,
+			SourceLabel:                from.SourceLabel,
+			SummaryPrompt:              from.SummaryPrompt,
+			LLM:                        from.LLM,
 			CompressByRelatedThreshold: from.CompressByRelatedThreshold,
 			Receivers:                  from.Receivers,
 		},
@@ -169,6 +176,7 @@ type Dependencies struct {
 	RouterFactory  route.Factory
 	ChannelFactory channel.Factory
 	KVStorage      kv.Storage
+	LLMFactory     llm.Factory
 }
 
 // --- Factory code block ---
@@ -322,7 +330,10 @@ func (n *notifier) newRouter(config *route.Config) (route.Router, error) {
 	return n.Dependencies().RouterFactory.New(
 		n.Instance(),
 		config,
-		route.Dependencies{RelatedScore: n.Dependencies().RelatedScore},
+		route.Dependencies{
+			RelatedScore: n.Dependencies().RelatedScore,
+			LLMFactory:   n.Dependencies().LLMFactory,
+		},
 	)
 }
 
@@ -339,7 +350,7 @@ func (n *notifier) handle(ctx context.Context, result *rule.Result) {
 	router := n.router
 	n.mu.RUnlock()
 
-	groups, err := router.Route(result)
+	groups, err := router.Route(ctx, result)
 	if err != nil {
 		// We don't retry in notifier, retry should be upstream.
 		log.Error(ctx, errors.Wrap(err, "route"))
@@ -428,7 +439,7 @@ func (n *notifier) send(ctx context.Context, work sendWork) error {
 }
 
 var nlogKey = func(group *route.FeedGroup, receiver Receiver) string {
-	return fmt.Sprintf("notifier.group.%s.receiver.%s", group.Name, receiver.Name)
+	return fmt.Sprintf("notifier.group.%s.receiver.%s.%d", group.Name, receiver.Name, group.Time.Unix())
 }
 
 func (n *notifier) isSent(ctx context.Context, group *route.FeedGroup, receiver Receiver) bool {

@@ -130,7 +130,7 @@ func (e *email) buildEmail(receiver Receiver, group *route.FeedGroup) (*gomail.M
 	m.SetHeader("To", receiver.Email)
 	m.SetHeader("Subject", group.Name)
 
-	body, err := e.buildBodyHTML(group.Feeds)
+	body, err := e.buildBodyHTML(group)
 	if err != nil {
 		return nil, errors.Wrap(err, "build email body HTML")
 	}
@@ -139,7 +139,7 @@ func (e *email) buildEmail(receiver Receiver, group *route.FeedGroup) (*gomail.M
 	return m, nil
 }
 
-func (e *email) buildBodyHTML(feeds []*route.Feed) ([]byte, error) {
+func (e *email) buildBodyHTML(group *route.FeedGroup) ([]byte, error) {
 	bodyBuf := buffer.Get()
 	defer buffer.Put(bodyBuf)
 
@@ -148,14 +148,24 @@ func (e *email) buildBodyHTML(feeds []*route.Feed) ([]byte, error) {
 		return nil, errors.Wrap(err, "write HTML header")
 	}
 
+	// Write summary.
+	if err := e.writeSummary(bodyBuf, group.Summary); err != nil {
+		return nil, errors.Wrap(err, "write summary")
+	}
+
 	// Write each feed content.
-	for i, feed := range feeds {
+	if _, err := bodyBuf.WriteString(`
+      <div style="margin-top:20px; padding-top:15px; border-top:1px solid #f1f3f4;">
+        <p style="font-size:32px; font-weight:500; margin:0 0 10px 0;">Feeds</p>`); err != nil {
+		return nil, errors.Wrap(err, "write feeds header")
+	}
+	for i, feed := range group.Feeds {
 		if err := e.writeFeedContent(bodyBuf, feed); err != nil {
 			return nil, errors.Wrap(err, "write feed content")
 		}
 
 		// Add separator (except the last feed).
-		if i < len(feeds)-1 {
+		if i < len(group.Feeds)-1 {
 			if err := e.writeSeparator(bodyBuf); err != nil {
 				return nil, errors.Wrap(err, "write separator")
 			}
@@ -186,6 +196,29 @@ func (e *email) writeHTMLHeader(buf *buffer.Bytes) error {
     <div style="background-color:#ffffff; border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,0.08); padding:30px; margin-bottom:30px;">`)
 
 	return err
+}
+
+func (e *email) writeSummary(buf *buffer.Bytes, summary string) error {
+	if summary == "" {
+		return nil
+	}
+
+	if _, err := buf.WriteString(`
+        <p style="font-size:32px; font-weight:500; margin:0 0 10px 0;">Summary</p>`); err != nil {
+		return errors.Wrap(err, "write summary header")
+	}
+
+	contentHTML, err := textconvert.MarkdownToHTML([]byte(summary))
+	if err != nil {
+		return errors.Wrap(err, "markdown to HTML")
+	}
+
+	contentHTMLWithStyle := fmt.Sprintf(`<div style="font-size:16px; line-height:1.8;">%s</div>`, contentHTML)
+	if _, err := buf.WriteString(contentHTMLWithStyle); err != nil {
+		return errors.Wrap(err, "write summary")
+	}
+
+	return nil
 }
 
 const timeLayout = "01-02 15:04"
@@ -311,7 +344,8 @@ func (e *email) renderMarkdownContent(buf *buffer.Bytes, feed *route.Feed) (n in
 		return 0, errors.Wrap(err, "markdown to HTML")
 	}
 
-	if _, err := buf.Write(contentHTML); err != nil {
+	contentHTMLWithStyle := fmt.Sprintf(`<div style="font-size:16px; line-height:1.8;">%s</div>`, contentHTML)
+	if _, err := buf.WriteString(contentHTMLWithStyle); err != nil {
 		return 0, errors.Wrap(err, "write content HTML")
 	}
 
