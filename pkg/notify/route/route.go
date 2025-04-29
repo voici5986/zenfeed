@@ -275,7 +275,12 @@ func (r *router) Route(ctx context.Context, result *rule.Result) (groups []*Grou
 	return groups, nil
 }
 
-func (r *router) generateSummary(ctx context.Context, prompt string, feeds []*Feed, sourceLabel string) (string, error) {
+func (r *router) generateSummary(
+	ctx context.Context,
+	prompt string,
+	feeds []*Feed,
+	sourceLabel string,
+) (string, error) {
 	content := r.parseContentToSummary(feeds, sourceLabel)
 	if content == "" {
 		return "", nil
@@ -296,6 +301,7 @@ func (r *router) generateSummary(ctx context.Context, prompt string, feeds []*Fe
 func (r *router) parseContentToSummary(feeds []*Feed, sourceLabel string) string {
 	if sourceLabel == "" {
 		b := runtimeutil.Must1(json.Marshal(feeds))
+
 		return string(b)
 	}
 
