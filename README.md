@@ -1,6 +1,6 @@
 [English](README-en.md)
 
-zenfeed：用 AI 赋能 RSS，自动为你筛选、总结、推送重要信息，告别信息过载，重拾阅读掌控感。
+![](docs/images/crad-overview.png)
 
 开箱即用的公共服务站：https://zenfeed.xyz (集成 Github Trending，V2EX 热榜等常见公开信源)
 
