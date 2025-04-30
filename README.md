@@ -1,6 +1,6 @@
 [English](README-en.md)
 
-![](docs/images/crad-overview.png)
+![](docs/images/crad.png)
 
 开箱即用的公共服务站：https://zenfeed.xyz (集成 Github Trending，V2EX 热榜等常见公开信源)
 
