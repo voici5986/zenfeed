@@ -613,10 +613,12 @@ func (s *storage) rewrite(ctx context.Context, feeds []*model.Feed) ([]*model.Fe
 		}(item)
 	}
 	wg.Wait()
-	if allFailed := len(errs) == len(feeds)-int(dropped.Load()); allFailed {
-		return nil, errs[0]
-	}
-	if len(errs) > 0 {
+
+	switch len(errs) {
+	case 0:
+	case len(feeds) - int(dropped.Load()):
+		return nil, errs[0] // All failed.
+	default:
 		log.Error(ctx, errors.Wrap(errs[0], "rewrite feeds"), "error_count", len(errs))
 	}
 
