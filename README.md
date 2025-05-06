@@ -10,7 +10,12 @@
 
 **3. 帮你时刻关注 “指定事件” 的秘书（如 “关税政策变化”，“xx 股票波动”）**
 
-开箱即用的公共服务站：https://zenfeed.xyz (集成 Github Trending，V2EX 热榜等常见公开信源)
+开箱即用的公共服务站：https://zenfeed.xyz (集成 Hacker News，Github Trending，V2EX 热榜等常见公开信源)
+> 总结模型以更新至 Gemini 2.5pro!!
+
+豆包机器人上架中！
+
+加入下方👇🏻微信群关注更新
 
 ## 前言
 
@@ -149,8 +154,6 @@ $env:API_KEY = "硅基流动apikey"; docker-compose -p zenfeed up -d
   * 以下是由于版权风险，暂时不推进
     * 支持 Webhook 通知
     * 爬虫
-
-> 进展会第一时间在 [Linux Do](https://linux.do/u/ajd/summary) 更新
 
 ## 有任何问题与反馈，欢迎加群讨论
 
