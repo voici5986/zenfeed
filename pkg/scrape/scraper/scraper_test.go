@@ -53,8 +53,8 @@ func TestConfig_Validate(t *testing.T) {
 			ThenExpected: thenExpected{
 				expectedConfig: &Config{
 					Name:     "test",
-					Past:     3 * timeutil.Day, // Default Past
-					Interval: time.Hour,        // Default/Minimum Interval
+					Past:     timeutil.Day, // Default Past
+					Interval: time.Hour,    // Default/Minimum Interval
 				},
 				isErr: false,
 			},
@@ -89,7 +89,7 @@ func TestConfig_Validate(t *testing.T) {
 			ThenExpected: thenExpected{
 				expectedConfig: &Config{
 					Name:     "test",
-					Past:     3 * timeutil.Day, // Default Past
+					Past:     timeutil.Day,     // Default Past
 					Interval: 10 * time.Minute, // Minimum Interval
 				},
 				isErr: false,
@@ -103,7 +103,7 @@ func TestConfig_Validate(t *testing.T) {
 			GivenDetail: givenDetail{
 				config: &Config{
 					Name:     "test",
-					Past:     24 * time.Hour,
+					Past:     4 * time.Hour,
 					Interval: 30 * time.Minute,
 				},
 			},
@@ -111,7 +111,7 @@ func TestConfig_Validate(t *testing.T) {
 			ThenExpected: thenExpected{
 				expectedConfig: &Config{
 					Name:     "test",
-					Past:     24 * time.Hour,
+					Past:     4 * time.Hour,
 					Interval: 30 * time.Minute,
 				},
 				isErr: false,
