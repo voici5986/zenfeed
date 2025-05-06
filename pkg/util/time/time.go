@@ -17,11 +17,13 @@ package time
 
 import (
 	"context"
+	"encoding/json"
 	"math/rand"
 	"time"
 	_ "time/tzdata"
 
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v3"
 
 	runtimeutil "github.com/glidea/zenfeed/pkg/util/runtime"
 )
@@ -83,4 +85,61 @@ func Tick(ctx context.Context, d time.Duration, f func() error) error {
 
 func Random(max time.Duration) time.Duration {
 	return time.Duration(rand.Int63n(int64(max)))
+}
+
+type Duration time.Duration
+
+func (d Duration) String() string {
+	return time.Duration(d).String()
+}
+
+func (d Duration) MarshalJSON() ([]byte, error) {
+	return json.Marshal(d.String())
+}
+
+func (d *Duration) UnmarshalJSON(b []byte) error {
+	var v any
+	if err := json.Unmarshal(b, &v); err != nil {
+		return err
+	}
+
+	switch tv := v.(type) {
+	case float64:
+		*d = Duration(time.Duration(tv))
+
+		return nil
+
+	case string:
+		parsed, err := time.ParseDuration(tv)
+		if err != nil {
+			return err
+		}
+		*d = Duration(parsed)
+
+		return nil
+
+	default:
+		return errors.Errorf("invalid duration: %v", tv)
+	}
+}
+
+func (d Duration) MarshalYAML() (interface{}, error) {
+	return d.String(), nil
+}
+
+func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
+	if value.Kind != yaml.ScalarNode {
+		return errors.Errorf("invalid duration: expected a scalar node, got %v", value.Kind)
+	}
+
+	s := value.Value
+
+	parsed, err := time.ParseDuration(s)
+	if err != nil {
+		return errors.Errorf("failed to parse duration string '%s' from YAML: %s", s, err.Error())
+	}
+
+	*d = Duration(parsed)
+
+	return nil
 }

@@ -99,9 +99,9 @@ func (c *Config) Validate() error {
 func (c *Config) From(app *config.App) {
 	*c = Config{
 		Dir:           app.Storage.Dir,
-		Retention:     app.Storage.Feed.Retention,
-		BlockDuration: app.Storage.Feed.BlockDuration,
-		FlushInterval: app.Storage.Feed.FlushInterval,
+		Retention:     time.Duration(app.Storage.Feed.Retention),
+		BlockDuration: time.Duration(app.Storage.Feed.BlockDuration),
+		FlushInterval: time.Duration(app.Storage.Feed.FlushInterval),
 		EmbeddingLLM:  app.Storage.Feed.EmbeddingLLM,
 	}
 }

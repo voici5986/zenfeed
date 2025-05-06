@@ -30,6 +30,7 @@ import (
 	"github.com/glidea/zenfeed/pkg/telemetry"
 	"github.com/glidea/zenfeed/pkg/telemetry/log"
 	telemetrymodel "github.com/glidea/zenfeed/pkg/telemetry/model"
+	timeutil "github.com/glidea/zenfeed/pkg/util/time"
 )
 
 // --- Interface code block ---
@@ -83,10 +84,10 @@ type LLM struct {
 }
 
 type Scrape struct {
-	Past           time.Duration  `yaml:"past,omitempty" json:"past,omitempty" desc:"The lookback time window for scraping feeds. e.g. 1h means only scrape feeds in the past 1 hour. Default: 3d"`
-	Interval       time.Duration  `yaml:"interval,omitempty" json:"interval,omitempty" desc:"How often to scrape each source, it is a global interval. e.g. 1h. Default: 1h"`
-	RSSHubEndpoint string         `yaml:"rsshub_endpoint,omitempty" json:"rsshub_endpoint,omitempty" desc:"The endpoint of the RSSHub. You can deploy your own RSSHub server or use the public one (https://docs.rsshub.app/guide/instances). e.g. https://rsshub.app. It is required when sources[].rss.rsshub_route_path is set."`
-	Sources        []ScrapeSource `yaml:"sources,omitempty" json:"sources,omitempty" desc:"The sources for scraping feeds."`
+	Past           timeutil.Duration `yaml:"past,omitempty" json:"past,omitempty" desc:"The lookback time window for scraping feeds. e.g. 1h means only scrape feeds in the past 1 hour. Default: 3d"`
+	Interval       timeutil.Duration `yaml:"interval,omitempty" json:"interval,omitempty" desc:"How often to scrape each source, it is a global interval. e.g. 1h. Default: 1h"`
+	RSSHubEndpoint string            `yaml:"rsshub_endpoint,omitempty" json:"rsshub_endpoint,omitempty" desc:"The endpoint of the RSSHub. You can deploy your own RSSHub server or use the public one (https://docs.rsshub.app/guide/instances). e.g. https://rsshub.app. It is required when sources[].rss.rsshub_route_path is set."`
+	Sources        []ScrapeSource    `yaml:"sources,omitempty" json:"sources,omitempty" desc:"The sources for scraping feeds."`
 }
 
 type Storage struct {
@@ -95,15 +96,15 @@ type Storage struct {
 }
 
 type FeedStorage struct {
-	Rewrites      []RewriteRule `yaml:"rewrites,omitempty" json:"rewrites,omitempty" desc:"How to process each feed before storing it. It inspired by Prometheus relabeling (https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config), this implements a very strong flexibility and loose coupling."`
-	FlushInterval time.Duration `yaml:"flush_interval,omitempty" json:"flush_interval,omitempty" desc:"How often to flush the feed storage to the database, higher value will cause high data loss risk, but on the other hand, it will reduce the number of disk operations and improve performance. Default: 200ms"`
-	EmbeddingLLM  string        `yaml:"embedding_llm,omitempty" json:"embedding_llm,omitempty" desc:"The embedding LLM for the feed storage. It will significantly affect the accuracy of semantic search, please be careful to choose. If you want to switch, please note to keep the old llm configuration, because the past data is still implicitly associated with it, otherwise it will cause the past data to be unable to be semantically searched. Default is the default LLM in llms section."`
-	Retention     time.Duration `yaml:"retention,omitempty" json:"retention,omitempty" desc:"How long to keep a feed. Default: 8d"`
-	BlockDuration time.Duration `yaml:"block_duration,omitempty" json:"block_duration,omitempty" desc:"How long to keep the feed storage block. Block is time-based, like Prometheus TSDB Block. Default: 25h"`
+	Rewrites      []RewriteRule     `yaml:"rewrites,omitempty" json:"rewrites,omitempty" desc:"How to process each feed before storing it. It inspired by Prometheus relabeling (https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config), this implements a very strong flexibility and loose coupling."`
+	FlushInterval timeutil.Duration `yaml:"flush_interval,omitempty" json:"flush_interval,omitempty" desc:"How often to flush the feed storage to the database, higher value will cause high data loss risk, but on the other hand, it will reduce the number of disk operations and improve performance. Default: 200ms"`
+	EmbeddingLLM  string            `yaml:"embedding_llm,omitempty" json:"embedding_llm,omitempty" desc:"The embedding LLM for the feed storage. It will significantly affect the accuracy of semantic search, please be careful to choose. If you want to switch, please note to keep the old llm configuration, because the past data is still implicitly associated with it, otherwise it will cause the past data to be unable to be semantically searched. Default is the default LLM in llms section."`
+	Retention     timeutil.Duration `yaml:"retention,omitempty" json:"retention,omitempty" desc:"How long to keep a feed. Default: 8d"`
+	BlockDuration timeutil.Duration `yaml:"block_duration,omitempty" json:"block_duration,omitempty" desc:"How long to keep the feed storage block. Block is time-based, like Prometheus TSDB Block. Default: 25h"`
 }
 
 type ScrapeSource struct {
-	Interval time.Duration     `yaml:"interval,omitempty" json:"interval,omitempty" desc:"How often to scrape this source. Default: global interval"`
+	Interval timeutil.Duration `yaml:"interval,omitempty" json:"interval,omitempty" desc:"How often to scrape this source. Default: global interval"`
 	Name     string            `yaml:"name,omitempty" json:"name,omitempty" desc:"The name of the source. It is required."`
 	Labels   map[string]string `yaml:"labels,omitempty" json:"labels,omitempty" desc:"The additional labels to add to the feed of this source."`
 	RSS      *ScrapeSourceRSS  `yaml:"rss,omitempty" json:"rss,omitempty" desc:"The RSS config of the source."`
@@ -134,12 +135,12 @@ type RewriteRuleTransformToText struct {
 }
 
 type SchedulsRule struct {
-	Name          string        `yaml:"name,omitempty" json:"name,omitempty" desc:"The name of the rule. It is required."`
-	Query         string        `yaml:"query,omitempty" json:"query,omitempty" desc:"The semantic query to get the feeds. NOTE it is optional"`
-	Threshold     float32       `yaml:"threshold,omitempty" json:"threshold,omitempty" desc:"The threshold to filter the query result by relevance (with 'query') score. It does not work when query is not set. Default is 0.6."`
-	LabelFilters  []string      `yaml:"label_filters,omitempty" json:"label_filters,omitempty" desc:"The label filters (equal or not equal) to match the feeds. e.g. [category=tech, source!=github]"`
-	EveryDay      string        `yaml:"every_day,omitempty" json:"every_day,omitempty" desc:"The query range at the end time of every day. Format: start~end, e.g. 00:00~23:59, or -22:00~7:00 (yesterday 22:00 to today 07:00)."`
-	WatchInterval time.Duration `yaml:"watch_interval,omitempty" json:"watch_interval,omitempty" desc:"The run and query interval to watch the rule. Default is 10m. It can not be set with every_day at same time."`
+	Name          string            `yaml:"name,omitempty" json:"name,omitempty" desc:"The name of the rule. It is required."`
+	Query         string            `yaml:"query,omitempty" json:"query,omitempty" desc:"The semantic query to get the feeds. NOTE it is optional"`
+	Threshold     float32           `yaml:"threshold,omitempty" json:"threshold,omitempty" desc:"The threshold to filter the query result by relevance (with 'query') score. It does not work when query is not set. Default is 0.6."`
+	LabelFilters  []string          `yaml:"label_filters,omitempty" json:"label_filters,omitempty" desc:"The label filters (equal or not equal) to match the feeds. e.g. [category=tech, source!=github]"`
+	EveryDay      string            `yaml:"every_day,omitempty" json:"every_day,omitempty" desc:"The query range at the end time of every day. Format: start~end, e.g. 00:00~23:59, or -22:00~7:00 (yesterday 22:00 to today 07:00)."`
+	WatchInterval timeutil.Duration `yaml:"watch_interval,omitempty" json:"watch_interval,omitempty" desc:"The run and query interval to watch the rule. Default is 10m. It can not be set with every_day at same time."`
 }
 
 type NotifyRoute struct {

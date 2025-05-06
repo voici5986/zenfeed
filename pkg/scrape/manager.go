@@ -66,14 +66,14 @@ func (c *Config) From(app *config.App) {
 	c.Scrapers = make([]scraper.Config, len(app.Scrape.Sources))
 	for i := range app.Scrape.Sources {
 		c.Scrapers[i] = scraper.Config{
-			Past:     app.Scrape.Past,
+			Past:     time.Duration(app.Scrape.Past),
 			Name:     app.Scrape.Sources[i].Name,
-			Interval: app.Scrape.Sources[i].Interval,
+			Interval: time.Duration(app.Scrape.Sources[i].Interval),
 			Labels:   model.Labels{},
 		}
 		c.Scrapers[i].Labels.FromMap(app.Scrape.Sources[i].Labels)
 		if c.Scrapers[i].Interval <= 0 {
-			c.Scrapers[i].Interval = app.Scrape.Interval
+			c.Scrapers[i].Interval = time.Duration(app.Scrape.Interval)
 		}
 		if app.Scrape.Sources[i].RSS != nil {
 			c.Scrapers[i].RSS = &scraper.ScrapeSourceRSS{

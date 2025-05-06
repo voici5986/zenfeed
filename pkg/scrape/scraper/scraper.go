@@ -55,7 +55,7 @@ const maxPast = 15 * 24 * time.Hour
 
 func (c *Config) Validate() error {
 	if c.Past <= 0 {
-		c.Past = 3 * timeutil.Day
+		c.Past = timeutil.Day
 	}
 	if c.Past > maxPast {
 		c.Past = maxPast
