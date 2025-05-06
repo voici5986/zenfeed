@@ -208,10 +208,11 @@ func (s *scraper) fillIDs(feeds []*model.Feed) []*model.Feed {
 	for _, feed := range feeds {
 		// We can not use the pub time to join the hash,
 		// because the pub time is dynamic for some sources.
+		//
+		// title may be changed for some sources... so...
 		source := feed.Labels.Get(model.LabelSource)
-		title := feed.Labels.Get(model.LabelTitle)
 		link := feed.Labels.Get(model.LabelLink)
-		feed.ID = hashutil.Sum64s([]string{source, title, link})
+		feed.ID = hashutil.Sum64s([]string{source, link})
 	}
 
 	return feeds
