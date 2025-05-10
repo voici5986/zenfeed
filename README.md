@@ -17,6 +17,8 @@
 
 加入下方👇🏻微信群关注更新
 
+金融专服筹划中，[详情](https://github.com/glidea/zenfeed/issues/11)
+
 ## 前言
 
 RSS（简易信息聚合）诞生于 Web 1.0 时代，旨在解决信息分散的问题，让用户能在一个地方聚合、追踪多个网站的更新，无需频繁访问。它将网站更新以摘要形式推送给订阅者，便于快速获取信息。
@@ -166,6 +168,10 @@ $env:API_KEY = "硅基流动apikey"; docker-compose -p zenfeed up -d
 喜欢本项目的话，赞助杯🧋（赛博要饭）
 
 <img src="docs/images/sponsor.png" alt="Wechat" width="150">
+
+## 生态项目
+
+* https://daily.ruhang365.com
 
 ## 注意
 * 1.0 版本之前不保证兼容性
