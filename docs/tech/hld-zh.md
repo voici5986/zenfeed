@@ -1,3 +1,5 @@
+> 适用版本：v0.2.2
+
 ```mermaid
 graph TD
     subgraph User_Interactions
