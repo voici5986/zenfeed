@@ -59,9 +59,9 @@
 
     *   **规则 2.1: 内容评分**
         ```yaml
-        - sourceLabel: "content"
+        - source_label: "content"
           transform:
-            toText:
+            to_text:
               llm: "qwen-default"
               prompt: "score" # 使用预设的 "score" prompt 模板
           match: "^([0-9]|10)$" # 确保 LLM 返回的是 0-10 的数字
@@ -70,7 +70,7 @@
         ```
     *   **规则 2.2: 根据评分过滤**
         ```yaml
-        - sourceLabel: "ai_score" # 使用上一条规则生成的评分作为判断依据
+        - source_label: "ai_score" # 使用上一条规则生成的评分作为判断依据
           # 无需 Transform
           match: "^[0-3]$"       # 匹配 0, 1, 2, 3 分
           action: "drop_feed"     # 丢弃这些低分文章
@@ -83,9 +83,9 @@
     *   **注意**: 当前 `ActionCreateOrUpdateLabel` 会将匹配成功的 `text` （即 `sourceLabel` 的值或其转换结果）作为新标签的值。若要实现固定值标签，需要通过 LLM 转换。
 *   **规则配置 (通过 LLM 实现映射)**:
     ```yaml
-    - sourceLabel: "source" # 源标签是 "source"
+    - source_label: "source" # 源标签是 "source"
       transform:
-        toText:
+        to_text:
           llm: "qwen-mini"
           # Prompt 需要精心设计，告诉 LLM 如何根据输入映射到输出
           # 例如，Prompt 可以包含类似 "If input is 'Hacker News', output 'community'. If input is 'GitHub Trending', output 'code'." 的逻辑
