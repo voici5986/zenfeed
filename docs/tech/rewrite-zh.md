@@ -19,10 +19,10 @@
 1.  **接收标签集**: 组件的入口是一个 `model.Labels` 对象，代表待处理的信息单元。
 2.  **顺序应用规则**: 系统会遍历用户配置的每一条 `Rule`。
 3.  **规则评估与执行**: 对于每一条规则，系统会：
-    *   **定位源文本**: 根据规则指定的 `SourceLabel` (默认为 `content`)，找到相应的文本内容。
-    *   **条件检查**: 检查源文本是否满足规则中声明的 `SkipTooShortThreshold`（最小长度，默认为300字符）。若不满足，则跳过当前规则。
-    *   **文本转换 (可选)**: 若规则声明了 `Transform` (如通过 `ToText` 使用 LLM 和特定 `Prompt` 进行处理)，则源文本会被转换为新文本。此转换结果将用于后续的匹配。
-    *   **模式匹配**: 使用规则中声明的 `Match` 正则表达式 (默认为 `.*`) 来匹配（可能已被转换过的）文本。若不匹配，则跳过当前规则。
+    *   **定位源文本**: 根据规则指定的 `source_label` (默认为 `content`)，找到相应的文本内容。
+    *   **条件检查**: 检查源文本是否满足规则中声明的 `skip_too_short_threshold`（最小长度，默认为300字符）。若不满足，则跳过当前规则。
+    *   **文本转换 (可选)**: 若规则声明了 `transform` (如通过 `to_text` 使用 LLM 和特定 `Prompt` 进行处理)，则源文本会被转换为新文本。此转换结果将用于后续的匹配。
+    *   **模式匹配**: 使用规则中声明的 `match` 正则表达式 (默认为 `.*`) 来匹配（可能已被转换过的）文本。若不匹配，则跳过当前规则。
     *   **执行动作**: 若文本匹配成功，则执行规则声明的 `Action`：
         *   `ActionDropFeed`: 指示应丢弃当前信息单元，处理流程终止。
         *   `ActionCreateOrUpdateLabel`: 使用（可能已被转换过的）匹配文本，为规则中指定的 `Label` 创建或更新标签值。
@@ -41,9 +41,9 @@
 *   **目标**: 根据文章内容，自动为其添加一个 `category` 标签，如 "Technology", "Finance" 等。
 *   **规则配置 (概念性)**:
     ```yaml
-    - sourceLabel: "content" # 使用文章正文作为分析源
+    - source_label: "content" # 使用文章正文作为分析源
       transform:
-        toText:
+        to_text:
           llm: "qwen-default" # 使用名为 "qwen-default" 的 LLM 配置
           prompt: "category"  # 使用预设的 "category" prompt 模板
       match: ".+"             # 匹配 LLM 返回的任何非空分类结果
@@ -80,7 +80,7 @@
 ### 示例 3: 基于特定标签值添加新标签
 
 *   **目标**: 如果文章的 `source` 标签值是 "Hacker News"，则添加一个新标签 `source_type: "community"`。
-    *   **注意**: 当前 `ActionCreateOrUpdateLabel` 会将匹配成功的 `text` （即 `sourceLabel` 的值或其转换结果）作为新标签的值。若要实现固定值标签，需要通过 LLM 转换。
+    *   **注意**: 当前 `ActionCreateOrUpdateLabel` 会将匹配成功的 `text` （即 `source_label` 的值或其转换结果）作为新标签的值。若要实现固定值标签，需要通过 LLM 转换。
 *   **规则配置 (通过 LLM 实现映射)**:
     ```yaml
     - source_label: "source" # 源标签是 "source"
@@ -103,3 +103,5 @@
 *   **效果**: 如果某文章的 `source` 标签值为 "Hacker News"，经过 LLM 处理后（理想情况下）会输出 "community"，然后 `source_type` 标签会被设置为 `{"source_type", "community"}`。
 
 这些示例展示了 `rewrite` 组件的灵活性和强大功能，通过组合不同的源标签、转换、匹配条件和动作，可以实现复杂的内容处理和信息增强逻辑。
+
+
