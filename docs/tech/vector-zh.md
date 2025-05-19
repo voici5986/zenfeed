@@ -27,8 +27,8 @@
     *   一个 Feed 的内容（尤其是其文本标签，如标题、正文）可能较长。如果直接将整个长文本生成单一的 embedding，可能会遇到以下问题：
         *   **LLM 输入长度限制**: 许多 embedding 模型对输入文本的长度有限制。
         *   **语义稀释 (Semantic Dilution)**: 对于包含多个主题或信息点的长文本，单一向量可能难以精确捕捉所有细微的语义，导致关键信息在整体平均化的向量表示中被“稀释”，降低了特定语义片段的表征能力。例如，一篇包含多个不同事件的综合报道，其单一向量可能无法很好地代表其中任何一个特定事件。
-    *   通过 `pkg/llm/embedding_spliter.go` 中的 `embeddingSpliter`，一个 Feed 的文本内容可以被切分成一个或多个语义相对连贯的 **文本块 (Chunks)**。这种切分有助于每个 chunk 聚焦于更具体的主题或信息点。
-    *   每个 Chunk 会被送入 LLM（如 `pkg/llm/embedding.go` 所管理的模型）生成一个 **向量嵌入 (vector embedding)**。
+    *   通过 `embeddingSpliter`，一个 Feed 的文本内容可以被切分成一个或多个语义相对连贯的 **文本块 (Chunks)**。这种切分有助于每个 chunk 聚焦于更具体的主题或信息点。
+    *   每个 Chunk 会被送入 LLM 生成一个 **向量嵌入 (vector embedding)**。
     *   因此，一个 Feed 节点在索引中会关联**一组向量 (vectors `[][]float32`)**，每个子向量代表其一个 Chunk 的语义。
 
 *   **Embedding**:
