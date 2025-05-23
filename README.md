@@ -12,6 +12,10 @@
 
 开箱即用的公共服务站：https://zenfeed.xyz (集成 Hacker News，Github Trending，V2EX 热榜等常见公开信源)
 
+每日研究报告（包含播客）（实验性质）
+* [V2EX](https://v2ex.analysis.zenfeed.xyz/)
+* [LinuxDO](https://linuxdo.analysis.zenfeed.xyz/)
+
 技术说明文档见：[HLD](docs/tech/hld-zh.md)
 
 ## 前言
@@ -54,7 +58,7 @@ zenfeed 是你的智能信息助手。它自动收集、筛选并总结关注的
 
 **For [万物追踪](https://www.wwzzai.com/) 替代品寻觅者** 🔍
 * zenfeed 同样拥有 [信息追踪能力](https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md#%E8%B0%83%E5%BA%A6%E9%85%8D%E7%BD%AE-scheduls)，且更强调高质量，自定义的数据源
-* [AI 首席情报官](https://github.com/TeamWiseFlow/wiseflow?tab=readme-ov-file) 的 RSS 版，灵活版，更接近 PaaS 形态
+* [AI 首席情报官](https://github.com/TeamWiseFlow/wiseflow?tab=readme-ov-file) 的 RSS 版，灵活版，更接近引擎形态
 <details>
   <summary>预览</summary>
   <img src="docs/images/monitoring.png" alt="" width="500">
