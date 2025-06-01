@@ -138,21 +138,8 @@ $env:API_KEY = "硅基流动apikey"; docker-compose -p zenfeed up -d
 以 Cherry Studio 为例，配置 MCP 并连接到 Zenfeed，见 [Cherry Studio MCP](docs/cherry-studio-mcp.md)
 > 默认地址 http://localhost:1301/sse
 
-## Roadmap
-* P0（大概率会做）
-  * 支持生成播客，男女对话，类似 NotebookLM
-  * 更多数据源
-    * 邮件
-    * 网页剪藏 Chrome 插件
-* P1（可能）
-  * 关键词搜索
-  * 支持搜索引擎作为数据源
-  * APP？
-  * 以下是由于版权风险，暂时不推进
-    * 支持 Webhook 通知
-    * 爬虫
-
-## 有任何问题与反馈，欢迎加群讨论
+## 欢迎加群讨论
+> 使用问题请提 Issue，谢绝微信私聊。帮助有类似问题的朋友
 
 <img src="docs/images/wechat.png" alt="Wechat" width="150">
 
