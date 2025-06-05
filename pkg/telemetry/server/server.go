@@ -18,22 +18,21 @@ package http
 import (
 	"net"
 	"net/http"
+	"net/http/pprof"
 
 	"github.com/pkg/errors"
 
-	"github.com/glidea/zenfeed/pkg/api"
 	"github.com/glidea/zenfeed/pkg/component"
 	"github.com/glidea/zenfeed/pkg/config"
 	telemetry "github.com/glidea/zenfeed/pkg/telemetry"
 	"github.com/glidea/zenfeed/pkg/telemetry/log"
+	"github.com/glidea/zenfeed/pkg/telemetry/metric"
 	telemetrymodel "github.com/glidea/zenfeed/pkg/telemetry/model"
-	"github.com/glidea/zenfeed/pkg/util/jsonrpc"
 )
 
 // --- Interface code block ---
 type Server interface {
 	component.Component
-	config.Watcher
 }
 
 type Config struct {
@@ -42,7 +41,7 @@ type Config struct {
 
 func (c *Config) Validate() error {
 	if c.Address == "" {
-		c.Address = ":1300"
+		c.Address = ":9090"
 	}
 	if _, _, err := net.SplitHostPort(c.Address); err != nil {
 		return errors.Wrap(err, "invalid address")
@@ -52,13 +51,12 @@ func (c *Config) Validate() error {
 }
 
 func (c *Config) From(app *config.App) *Config {
-	c.Address = app.API.HTTP.Address
+	c.Address = app.Telemetry.Address
 
 	return c
 }
 
 type Dependencies struct {
-	API api.API
 }
 
 // --- Factory code block ---
@@ -87,25 +85,24 @@ func new(instance string, app *config.App, dependencies Dependencies) (Server, e
 	}
 
 	router := http.NewServeMux()
-	api := dependencies.API
-	router.Handle("/write", jsonrpc.API(api.Write))
-	router.Handle("/query_config", jsonrpc.API(api.QueryAppConfig))
-	router.Handle("/apply_config", jsonrpc.API(api.ApplyAppConfig))
-	router.Handle("/query_config_schema", jsonrpc.API(api.QueryAppConfigSchema))
-	router.Handle("/query_rsshub_categories", jsonrpc.API(api.QueryRSSHubCategories))
-	router.Handle("/query_rsshub_websites", jsonrpc.API(api.QueryRSSHubWebsites))
-	router.Handle("/query_rsshub_routes", jsonrpc.API(api.QueryRSSHubRoutes))
-	router.Handle("/query", jsonrpc.API(api.Query))
-	httpServer := &http.Server{Addr: config.Address, Handler: router}
+	router.Handle("/health", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+	}))
+	router.Handle("/metrics", metric.Handler())
+	router.HandleFunc("/pprof", pprof.Index)
+	router.HandleFunc("/pprof/cmdline", pprof.Cmdline)
+	router.HandleFunc("/pprof/profile", pprof.Profile)
+	router.HandleFunc("/pprof/symbol", pprof.Symbol)
+	router.HandleFunc("/pprof/trace", pprof.Trace)
 
 	return &server{
 		Base: component.New(&component.BaseConfig[Config, Dependencies]{
-			Name:         "HTTPServer",
+			Name:         "TelemetryServer",
 			Instance:     instance,
 			Config:       config,
 			Dependencies: dependencies,
 		}),
-		http: httpServer,
+		http: &http.Server{Addr: config.Address, Handler: router},
 	}, nil
 }
 
@@ -135,25 +132,6 @@ func (s *server) Run() (err error) {
 	}
 }
 
-func (s *server) Reload(app *config.App) error {
-	newConfig := &Config{}
-	newConfig.From(app)
-	if err := newConfig.Validate(); err != nil {
-		return errors.Wrap(err, "validate config")
-	}
-	if s.Config().Address != newConfig.Address {
-		return errors.New("address cannot be reloaded")
-	}
-
-	s.SetConfig(newConfig)
-
-	return nil
-}
-
 type mockServer struct {
 	component.Mock
-}
-
-func (m *mockServer) Reload(app *config.App) error {
-	return m.Called(app).Error(0)
 }

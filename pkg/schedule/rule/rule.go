@@ -18,7 +18,6 @@ package rule
 import (
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	"github.com/pkg/errors"
 
@@ -58,11 +57,8 @@ func (c *Config) Validate() error { //nolint:cyclop,gocognit
 	if c.Name == "" {
 		return errors.New("name is required")
 	}
-	if c.Query != "" && utf8.RuneCountInString(c.Query) < 5 {
-		return errors.New("query must be at least 5 characters")
-	}
 	if c.Threshold == 0 {
-		c.Threshold = 0.6
+		c.Threshold = 0.5
 	}
 	if c.Threshold < 0 || c.Threshold > 1 {
 		return errors.New("threshold must be between 0 and 1")

@@ -30,6 +30,7 @@ import (
 
 const (
 	AppName = "zenfeed"
+	Module  = "github.com/glidea/zenfeed"
 )
 
 // LabelXXX is the metadata label for the feed.
@@ -231,6 +232,76 @@ func (ls Labels) sort() {
 type Label struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
+}
+
+const (
+	LabelFilterEqual    = "="
+	LabelFilterNotEqual = "!="
+)
+
+type LabelFilter struct {
+	Label string
+	Equal bool
+	Value string
+}
+
+func NewLabelFilter(filter string) (LabelFilter, error) {
+	eq := false
+	parts := strings.Split(filter, LabelFilterNotEqual)
+	if len(parts) != 2 {
+		parts = strings.Split(filter, LabelFilterEqual)
+		eq = true
+	}
+	if len(parts) != 2 {
+		return LabelFilter{}, errors.New("invalid label filter")
+	}
+
+	return LabelFilter{Label: parts[0], Value: parts[1], Equal: eq}, nil
+}
+
+func (f LabelFilter) Match(labels Labels) bool {
+	lv := labels.Get(f.Label)
+	if lv == "" {
+		return false
+	}
+
+	if f.Equal && lv == f.Value {
+		return true
+	}
+	if !f.Equal && lv != f.Value {
+		return true
+	}
+
+	return false
+}
+
+type LabelFilters []LabelFilter
+
+func (ls LabelFilters) Match(labels Labels) bool {
+	if len(ls) == 0 {
+		return true // No filters, always match.
+	}
+
+	for _, l := range ls {
+		if !l.Match(labels) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func NewLabelFilters(filters []string) (LabelFilters, error) {
+	ls := make(LabelFilters, len(filters))
+	for i, f := range filters {
+		lf, err := NewLabelFilter(f)
+		if err != nil {
+			return nil, errors.Wrapf(err, "new label filter %q", f)
+		}
+		ls[i] = lf
+	}
+
+	return ls, nil
 }
 
 // readExpectedDelim reads the next token and checks if it's the expected delimiter.

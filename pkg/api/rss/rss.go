@@ -13,22 +13,30 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-package http
+package rss
 
 import (
+	"fmt"
 	"net"
 	"net/http"
+	"text/template"
+	"time"
 
+	"github.com/benbjohnson/clock"
+	"github.com/gorilla/feeds"
 	"github.com/pkg/errors"
 
 	"github.com/glidea/zenfeed/pkg/api"
 	"github.com/glidea/zenfeed/pkg/component"
 	"github.com/glidea/zenfeed/pkg/config"
+	"github.com/glidea/zenfeed/pkg/model"
 	telemetry "github.com/glidea/zenfeed/pkg/telemetry"
 	"github.com/glidea/zenfeed/pkg/telemetry/log"
 	telemetrymodel "github.com/glidea/zenfeed/pkg/telemetry/model"
-	"github.com/glidea/zenfeed/pkg/util/jsonrpc"
+	"github.com/glidea/zenfeed/pkg/util/buffer"
 )
+
+var clk = clock.New()
 
 // --- Interface code block ---
 type Server interface {
@@ -37,22 +45,34 @@ type Server interface {
 }
 
 type Config struct {
-	Address string
+	Address             string
+	ContentHTMLTemplate string
+	contentHTMLTemplate *template.Template
 }
 
 func (c *Config) Validate() error {
 	if c.Address == "" {
-		c.Address = ":1300"
+		c.Address = ":1302"
 	}
 	if _, _, err := net.SplitHostPort(c.Address); err != nil {
 		return errors.Wrap(err, "invalid address")
 	}
 
+	if c.ContentHTMLTemplate == "" {
+		c.ContentHTMLTemplate = "{{ .summary_html_snippet }}"
+	}
+	t, err := template.New("").Parse(c.ContentHTMLTemplate)
+	if err != nil {
+		return errors.Wrap(err, "parse rss content template")
+	}
+	c.contentHTMLTemplate = t
+
 	return nil
 }
 
 func (c *Config) From(app *config.App) *Config {
-	c.Address = app.API.HTTP.Address
+	c.Address = app.API.RSS.Address
+	c.ContentHTMLTemplate = app.API.RSS.ContentHTMLTemplate
 
 	return c
 }
@@ -86,27 +106,21 @@ func new(instance string, app *config.App, dependencies Dependencies) (Server, e
 		return nil, errors.Wrap(err, "validate config")
 	}
 
-	router := http.NewServeMux()
-	api := dependencies.API
-	router.Handle("/write", jsonrpc.API(api.Write))
-	router.Handle("/query_config", jsonrpc.API(api.QueryAppConfig))
-	router.Handle("/apply_config", jsonrpc.API(api.ApplyAppConfig))
-	router.Handle("/query_config_schema", jsonrpc.API(api.QueryAppConfigSchema))
-	router.Handle("/query_rsshub_categories", jsonrpc.API(api.QueryRSSHubCategories))
-	router.Handle("/query_rsshub_websites", jsonrpc.API(api.QueryRSSHubWebsites))
-	router.Handle("/query_rsshub_routes", jsonrpc.API(api.QueryRSSHubRoutes))
-	router.Handle("/query", jsonrpc.API(api.Query))
-	httpServer := &http.Server{Addr: config.Address, Handler: router}
-
-	return &server{
+	s := &server{
 		Base: component.New(&component.BaseConfig[Config, Dependencies]{
-			Name:         "HTTPServer",
+			Name:         "RSSServer",
 			Instance:     instance,
 			Config:       config,
 			Dependencies: dependencies,
 		}),
-		http: httpServer,
-	}, nil
+	}
+
+	router := http.NewServeMux()
+	router.Handle("/", http.HandlerFunc(s.rss))
+
+	s.http = &http.Server{Addr: config.Address, Handler: router}
+
+	return s, nil
 }
 
 // --- Implementation code block ---
@@ -148,6 +162,64 @@ func (s *server) Reload(app *config.App) error {
 	s.SetConfig(newConfig)
 
 	return nil
+}
+
+func (s *server) rss(w http.ResponseWriter, r *http.Request) {
+	var err error
+	ctx := telemetry.StartWith(r.Context(), append(s.TelemetryLabels(), telemetrymodel.KeyOperation, "rss")...)
+	defer telemetry.End(ctx, err)
+
+	// Extract parameters.
+	ps := r.URL.Query()
+	labelFilters := ps["label_filter"]
+	query := ps.Get("query")
+
+	// Forward query request to API.
+	now := clk.Now()
+	queryResult, err := s.Dependencies().API.Query(ctx, &api.QueryRequest{
+		Query:        query,
+		LabelFilters: labelFilters,
+		Start:        now.Add(-24 * time.Hour),
+		End:          now,
+		Limit:        100,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest) // TODO: standardize error handling.
+		return
+	}
+
+	// Render and convert to RSS.
+	rssObj := &feeds.Feed{
+		Title:       fmt.Sprintf("Zenfeed RSS - %s", ps.Encode()),
+		Description: "Powered by Github Zenfeed - https://github.com/glidea/zenfeed. If you use Folo, please enable 'Appearance - Content - Render inline styles'",
+		Items:       make([]*feeds.Item, 0, len(queryResult.Feeds)),
+	}
+
+	buf := buffer.Get()
+	defer buffer.Put(buf)
+
+	for _, feed := range queryResult.Feeds {
+		buf.Reset()
+
+		if err = s.Config().contentHTMLTemplate.Execute(buf, feed.Labels.Map()); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		item := &feeds.Item{
+			Title:   feed.Labels.Get(model.LabelTitle),
+			Link:    &feeds.Link{Href: feed.Labels.Get(model.LabelLink)},
+			Created: feed.Time, // NOTE: scrape time, not pub time.
+			Content: buf.String(),
+		}
+
+		rssObj.Items = append(rssObj.Items, item)
+	}
+
+	if err = rssObj.WriteRss(w); err != nil {
+		log.Error(ctx, errors.Wrap(err, "write rss response"))
+		return
+	}
 }
 
 type mockServer struct {

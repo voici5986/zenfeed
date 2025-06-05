@@ -32,8 +32,8 @@ import (
 // --- Interface code block ---
 type Storage interface {
 	component.Component
-	Get(ctx context.Context, key string) (string, error)
-	Set(ctx context.Context, key string, value string, ttl time.Duration) error
+	Get(ctx context.Context, key []byte) ([]byte, error)
+	Set(ctx context.Context, key []byte, value []byte, ttl time.Duration) error
 }
 
 var ErrNotFound = errors.New("not found")
@@ -137,7 +137,7 @@ func (k *kv) Close() error {
 
 const bucket = "0"
 
-func (k *kv) Get(ctx context.Context, key string) (value string, err error) {
+func (k *kv) Get(ctx context.Context, key []byte) (value []byte, err error) {
 	ctx = telemetry.StartWith(ctx, append(k.TelemetryLabels(), telemetrymodel.KeyOperation, "Get")...)
 	defer func() {
 		telemetry.End(ctx, func() error {
@@ -157,22 +157,22 @@ func (k *kv) Get(ctx context.Context, key string) (value string, err error) {
 	})
 	switch {
 	case err == nil:
-		return string(b), nil
+		return b, nil
 	case errors.Is(err, nutsdb.ErrNotFoundKey):
-		return "", ErrNotFound
+		return nil, ErrNotFound
 	case strings.Contains(err.Error(), "key not found"):
-		return "", ErrNotFound
+		return nil, ErrNotFound
 	default:
-		return "", err
+		return nil, err
 	}
 }
 
-func (k *kv) Set(ctx context.Context, key string, value string, ttl time.Duration) (err error) {
+func (k *kv) Set(ctx context.Context, key []byte, value []byte, ttl time.Duration) (err error) {
 	ctx = telemetry.StartWith(ctx, append(k.TelemetryLabels(), telemetrymodel.KeyOperation, "Set")...)
 	defer func() { telemetry.End(ctx, err) }()
 
 	return k.db.Update(func(tx *nutsdb.Tx) error {
-		return tx.Put(bucket, []byte(key), []byte(value), uint32(ttl.Seconds()))
+		return tx.Put(bucket, key, value, uint32(ttl.Seconds()))
 	})
 }
 
@@ -180,13 +180,13 @@ type mockKV struct {
 	component.Mock
 }
 
-func (m *mockKV) Get(ctx context.Context, key string) (string, error) {
+func (m *mockKV) Get(ctx context.Context, key []byte) ([]byte, error) {
 	args := m.Called(ctx, key)
 
-	return args.String(0), args.Error(1)
+	return args.Get(0).([]byte), args.Error(1)
 }
 
-func (m *mockKV) Set(ctx context.Context, key string, value string, ttl time.Duration) error {
+func (m *mockKV) Set(ctx context.Context, key []byte, value []byte, ttl time.Duration) error {
 	args := m.Called(ctx, key, value, ttl)
 
 	return args.Error(0)

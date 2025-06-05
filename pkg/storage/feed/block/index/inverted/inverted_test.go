@@ -118,9 +118,7 @@ func TestSearch(t *testing.T) {
 		setupLabels map[uint64]model.Labels
 	}
 	type whenDetail struct {
-		searchLabel string
-		eq          bool
-		searchValue string
+		matcher model.LabelFilter
 	}
 	type thenExpected struct {
 		want []uint64
@@ -140,9 +138,11 @@ func TestSearch(t *testing.T) {
 				},
 			},
 			WhenDetail: whenDetail{
-				searchLabel: "category",
-				searchValue: "tech",
-				eq:          true,
+				matcher: model.LabelFilter{
+					Label: "category",
+					Value: "tech",
+					Equal: true,
+				},
 			},
 			ThenExpected: thenExpected{
 				want: []uint64{1, 2},
@@ -159,9 +159,11 @@ func TestSearch(t *testing.T) {
 				},
 			},
 			WhenDetail: whenDetail{
-				searchLabel: "invalid",
-				searchValue: "value",
-				eq:          true,
+				matcher: model.LabelFilter{
+					Label: "invalid",
+					Value: "value",
+					Equal: true,
+				},
 			},
 			ThenExpected: thenExpected{
 				want: nil,
@@ -178,9 +180,11 @@ func TestSearch(t *testing.T) {
 				},
 			},
 			WhenDetail: whenDetail{
-				searchLabel: "category",
-				searchValue: "invalid",
-				eq:          true,
+				matcher: model.LabelFilter{
+					Label: "category",
+					Value: "invalid",
+					Equal: true,
+				},
 			},
 			ThenExpected: thenExpected{
 				want: nil,
@@ -200,9 +204,11 @@ func TestSearch(t *testing.T) {
 				},
 			},
 			WhenDetail: whenDetail{
-				searchLabel: "category",
-				searchValue: "tech",
-				eq:          false,
+				matcher: model.LabelFilter{
+					Label: "category",
+					Value: "tech",
+					Equal: false,
+				},
 			},
 			ThenExpected: thenExpected{
 				want: []uint64{2},
@@ -220,9 +226,11 @@ func TestSearch(t *testing.T) {
 				},
 			},
 			WhenDetail: whenDetail{
-				searchLabel: "invalid",
-				searchValue: "value",
-				eq:          false,
+				matcher: model.LabelFilter{
+					Label: "invalid",
+					Value: "value",
+					Equal: false,
+				},
 			},
 			ThenExpected: thenExpected{
 				want: []uint64{1, 2},
@@ -240,7 +248,7 @@ func TestSearch(t *testing.T) {
 			}
 
 			// When.
-			result := idx.Search(context.Background(), tt.WhenDetail.searchLabel, tt.WhenDetail.eq, tt.WhenDetail.searchValue)
+			result := idx.Search(context.Background(), tt.WhenDetail.matcher)
 
 			// Then.
 			if tt.ThenExpected.want == nil {

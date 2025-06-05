@@ -227,7 +227,7 @@ func (s *scraper) filterExists(ctx context.Context, feeds []*model.Feed) (filter
 	appendToResult := func(feed *model.Feed) {
 		key := keyPrefix + strconv.FormatUint(feed.ID, 10)
 		value := timeutil.Format(feed.Time)
-		if err := s.Dependencies().KVStorage.Set(ctx, key, value, ttl); err != nil {
+		if err := s.Dependencies().KVStorage.Set(ctx, []byte(key), []byte(value), ttl); err != nil {
 			log.Error(ctx, err, "set last try store time")
 		}
 		filtered = append(filtered, feed)
@@ -236,7 +236,7 @@ func (s *scraper) filterExists(ctx context.Context, feeds []*model.Feed) (filter
 	for _, feed := range feeds {
 		key := keyPrefix + strconv.FormatUint(feed.ID, 10)
 
-		lastTryStored, err := s.Dependencies().KVStorage.Get(ctx, key)
+		lastTryStored, err := s.Dependencies().KVStorage.Get(ctx, []byte(key))
 		switch {
 		default:
 			log.Error(ctx, err, "get last stored time, fallback to continue writing")
@@ -246,7 +246,7 @@ func (s *scraper) filterExists(ctx context.Context, feeds []*model.Feed) (filter
 			appendToResult(feed)
 
 		case err == nil:
-			t, err := timeutil.Parse(lastTryStored)
+			t, err := timeutil.Parse(string(lastTryStored))
 			if err != nil {
 				log.Error(ctx, err, "parse last try stored time, fallback to continue writing")
 				appendToResult(feed)

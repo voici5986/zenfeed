@@ -72,55 +72,24 @@ func (s SubRoutes) Match(feed *block.FeedVO) *SubRoute {
 type SubRoute struct {
 	Route
 	Matchers []string
-	matchers []matcher
+	matchers model.LabelFilters
 }
 
 func (r *SubRoute) Match(feed *block.FeedVO) *SubRoute {
+	// Match sub routes.
 	for _, subRoute := range r.SubRoutes {
 		if matched := subRoute.Match(feed); matched != nil {
 			return matched
 		}
 	}
-	for _, m := range r.matchers {
-		fv := feed.Labels.Get(m.key)
-		switch m.equal {
-		case true:
-			if fv != m.value {
-				return nil
-			}
-		default:
-			if fv == m.value {
-				return nil
-			}
-		}
+
+	// Match self.
+	if !r.matchers.Match(feed.Labels) {
+		return nil
 	}
 
 	return r
 }
-
-type matcher struct {
-	key   string
-	value string
-	equal bool
-}
-
-var (
-	matcherEqual    = "="
-	matcherNotEqual = "!="
-	parseMatcher    = func(filter string) (matcher, error) {
-		eq := false
-		parts := strings.Split(filter, matcherNotEqual)
-		if len(parts) != 2 {
-			parts = strings.Split(filter, matcherEqual)
-			eq = true
-		}
-		if len(parts) != 2 {
-			return matcher{}, errors.New("invalid matcher")
-		}
-
-		return matcher{key: parts[0], value: parts[1], equal: eq}, nil
-	}
-)
 
 func (r *SubRoute) Validate() error {
 	if len(r.GroupBy) == 0 {
@@ -129,17 +98,16 @@ func (r *SubRoute) Validate() error {
 	if r.CompressByRelatedThreshold == nil {
 		r.CompressByRelatedThreshold = ptr.To(float32(0.85))
 	}
+
 	if len(r.Matchers) == 0 {
 		return errors.New("matchers is required")
 	}
-	r.matchers = make([]matcher, len(r.Matchers))
-	for i, matcher := range r.Matchers {
-		m, err := parseMatcher(matcher)
-		if err != nil {
-			return errors.Wrap(err, "invalid matcher")
-		}
-		r.matchers[i] = m
+	matchers, err := model.NewLabelFilters(r.Matchers)
+	if err != nil {
+		return errors.Wrap(err, "invalid matchers")
 	}
+	r.matchers = matchers
+
 	for _, subRoute := range r.SubRoutes {
 		if err := subRoute.Validate(); err != nil {
 			return errors.Wrap(err, "invalid sub_route")
@@ -151,7 +119,7 @@ func (r *SubRoute) Validate() error {
 
 func (c *Config) Validate() error {
 	if len(c.GroupBy) == 0 {
-		c.GroupBy = []string{model.LabelSource}
+		c.GroupBy = []string{model.LabelType}
 	}
 	if c.CompressByRelatedThreshold == nil {
 		c.CompressByRelatedThreshold = ptr.To(float32(0.85))
@@ -179,8 +147,8 @@ type FeedGroup struct {
 	Name    string
 	Time    time.Time
 	Labels  model.Labels
-	Feeds   []*Feed
 	Summary string
+	Feeds   []*Feed
 }
 
 func (g *FeedGroup) ID() string {

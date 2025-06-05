@@ -7,13 +7,14 @@ require (
 	github.com/benbjohnson/clock v1.3.5
 	github.com/chewxy/math32 v1.10.1
 	github.com/edsrzf/mmap-go v1.2.0
+	github.com/gorilla/feeds v1.2.0
 	github.com/mark3labs/mcp-go v0.17.0
 	github.com/mmcdole/gofeed v1.3.0
 	github.com/nutsdb/nutsdb v1.0.4
 	github.com/onsi/gomega v1.36.1
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.21.1
-	github.com/sashabaranov/go-openai v1.36.1
+	github.com/sashabaranov/go-openai v1.40.1
 	github.com/stretchr/testify v1.10.0
 	github.com/veqryn/slog-dedup v0.5.0
 	github.com/yuin/goldmark v1.7.8
@@ -45,6 +46,7 @@ require (
 	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
+	github.com/temoto/robotstxt v1.1.2
 	github.com/tidwall/btree v1.6.0 // indirect
 	github.com/xujiajun/mmap-go v1.0.1 // indirect
 	github.com/xujiajun/utils v0.0.0-20220904132955-5f7c5b914235 // indirect

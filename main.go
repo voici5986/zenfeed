@@ -28,6 +28,7 @@ import (
 	"github.com/glidea/zenfeed/pkg/api"
 	"github.com/glidea/zenfeed/pkg/api/http"
 	"github.com/glidea/zenfeed/pkg/api/mcp"
+	"github.com/glidea/zenfeed/pkg/api/rss"
 	"github.com/glidea/zenfeed/pkg/component"
 	"github.com/glidea/zenfeed/pkg/config"
 	"github.com/glidea/zenfeed/pkg/llm"
@@ -47,6 +48,7 @@ import (
 	"github.com/glidea/zenfeed/pkg/storage/feed/block/index/vector"
 	"github.com/glidea/zenfeed/pkg/storage/kv"
 	"github.com/glidea/zenfeed/pkg/telemetry/log"
+	telemetryserver "github.com/glidea/zenfeed/pkg/telemetry/server"
 	timeutil "github.com/glidea/zenfeed/pkg/util/time"
 )
 
@@ -118,6 +120,7 @@ type App struct {
 	configPath string
 	configMgr  config.Manager
 	conf       *config.App
+	telemetry  telemetryserver.Server
 
 	kvStorage   kv.Storage
 	llmFactory  llm.Factory
@@ -126,6 +129,7 @@ type App struct {
 	api         api.API
 	http        http.Server
 	mcp         mcp.Server
+	rss         rss.Server
 	scraperMgr  scrape.Manager
 	scheduler   schedule.Scheduler
 	notifier    notify.Notifier
@@ -153,6 +157,10 @@ func (a *App) setup() error {
 		return a.applyGlobals(newConf)
 	}))
 
+	if err := a.setupTelemetryServer(); err != nil {
+		return errors.Wrap(err, "setup telemetry server")
+	}
+
 	if err := a.setupKVStorage(); err != nil {
 		return errors.Wrap(err, "setup kv storage")
 	}
@@ -173,6 +181,9 @@ func (a *App) setup() error {
 	}
 	if err := a.setupMCPServer(); err != nil {
 		return errors.Wrap(err, "setup mcp server")
+	}
+	if err := a.setupRSSServer(); err != nil {
+		return errors.Wrap(err, "setup rss server")
 	}
 	if err := a.setupScraper(); err != nil {
 		return errors.Wrap(err, "setup scraper")
@@ -209,8 +220,8 @@ func (a *App) applyGlobals(conf *config.App) error {
 	if err := timeutil.SetLocation(conf.Timezone); err != nil {
 		return errors.Wrapf(err, "set timezone to %s", conf.Timezone)
 	}
-	if err := log.SetLevel(log.Level(conf.Log.Level)); err != nil {
-		return errors.Wrapf(err, "set log level to %s", conf.Log.Level)
+	if err := log.SetLevel(log.Level(conf.Telemetry.Log.Level)); err != nil {
+		return errors.Wrapf(err, "set log level to %s", conf.Telemetry.Log.Level)
 	}
 
 	return nil
@@ -271,6 +282,16 @@ func (a *App) setupFeedStorage() (err error) {
 	return nil
 }
 
+// setupTelemetryServer initializes the Telemetry server.
+func (a *App) setupTelemetryServer() (err error) {
+	a.telemetry, err = telemetryserver.NewFactory().New(component.Global, a.conf, telemetryserver.Dependencies{})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // setupAPI initializes the API service.
 func (a *App) setupAPI() (err error) {
 	a.api, err = api.NewFactory().New(component.Global, a.conf, api.Dependencies{
@@ -311,6 +332,20 @@ func (a *App) setupMCPServer() (err error) {
 	}
 
 	a.configMgr.Subscribe(a.mcp)
+
+	return nil
+}
+
+// setupRSSServer initializes the RSS server.
+func (a *App) setupRSSServer() (err error) {
+	a.rss, err = rss.NewFactory().New(component.Global, a.conf, rss.Dependencies{
+		API: a.api,
+	})
+	if err != nil {
+		return err
+	}
+
+	a.configMgr.Subscribe(a.rss)
 
 	return nil
 }
@@ -384,12 +419,12 @@ func (a *App) run(ctx context.Context) error {
 	log.Info(ctx, "starting application components...")
 	if err := component.Run(ctx,
 		component.Group{a.configMgr},
-		component.Group{a.llmFactory},
+		component.Group{a.llmFactory, a.telemetry},
 		component.Group{a.rewriter},
 		component.Group{a.feedStorage},
 		component.Group{a.kvStorage},
 		component.Group{a.notifier, a.api},
-		component.Group{a.http, a.mcp, a.scraperMgr, a.scheduler},
+		component.Group{a.http, a.mcp, a.rss, a.scraperMgr, a.scheduler},
 	); err != nil && !errors.Is(err, context.Canceled) {
 		return err
 	}

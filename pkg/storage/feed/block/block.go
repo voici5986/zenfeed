@@ -26,7 +26,6 @@ import (
 	"runtime"
 	"slices"
 	"strconv"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -277,47 +276,20 @@ type QueryOptions struct {
 	Query        string
 	Threshold    float32
 	LabelFilters []string
-	labelFilters []LabelFilter
+	labelFilters model.LabelFilters
 	Limit        int
 	Start, End   time.Time
 }
-
-var (
-	LabelFilterEqual    = "="
-	LabelFilterNotEqual = "!="
-
-	NewLabelFilter = func(key, value string, eq bool) string {
-		if eq {
-			return fmt.Sprintf("%s%s%s", key, LabelFilterEqual, value)
-		}
-
-		return fmt.Sprintf("%s%s%s", key, LabelFilterNotEqual, value)
-	}
-
-	ParseLabelFilter = func(filter string) (LabelFilter, error) {
-		eq := false
-		parts := strings.Split(filter, LabelFilterNotEqual)
-		if len(parts) != 2 {
-			parts = strings.Split(filter, LabelFilterEqual)
-			eq = true
-		}
-		if len(parts) != 2 {
-			return LabelFilter{}, errors.New("invalid label filter")
-		}
-
-		return LabelFilter{Label: parts[0], Value: parts[1], Equal: eq}, nil
-	}
-)
 
 func (q *QueryOptions) Validate() error { //nolint:cyclop
 	if q.Threshold < 0 || q.Threshold > 1 {
 		return errors.New("threshold must be between 0 and 1")
 	}
-	for _, labelFilter := range q.LabelFilters {
-		if labelFilter == "" {
+	for _, s := range q.LabelFilters {
+		if s == "" {
 			return errors.New("label filter is required")
 		}
-		filter, err := ParseLabelFilter(labelFilter)
+		filter, err := model.NewLabelFilter(s)
 		if err != nil {
 			return errors.Wrap(err, "parse label filter")
 		}
@@ -366,13 +338,6 @@ func (q *QueryOptions) HitTimeRangeCondition(b Block) bool {
 	blockAsBase := in(qStart, bStart, bEnd) || in(qEnd, bStart, bEnd)
 
 	return queryAsBase || blockAsBase
-}
-
-// LabelFilter defines the matcher for an item.
-type LabelFilter struct {
-	Label string
-	Equal bool
-	Value string
 }
 
 // --- Factory code block ---
@@ -1228,14 +1193,14 @@ func (b *block) applyFilters(ctx context.Context, query *QueryOptions) (res filt
 	return b.mergeFilterResults(labelsResult, vectorsResult), nil
 }
 
-func (b *block) applyLabelFilters(ctx context.Context, filters []LabelFilter) filterResult {
+func (b *block) applyLabelFilters(ctx context.Context, filters model.LabelFilters) filterResult {
 	if len(filters) == 0 {
 		return matchedAllFilterResult
 	}
 
 	var allIDs map[uint64]struct{}
 	for _, filter := range filters {
-		ids := b.invertedIndex.Search(ctx, filter.Label, filter.Equal, filter.Value)
+		ids := b.invertedIndex.Search(ctx, filter)
 		if len(ids) == 0 {
 			return matchedNothingFilterResult
 		}
@@ -1317,7 +1282,7 @@ func (b *block) mergeFilterResults(x, y filterResult) filterResult {
 }
 
 func (b *block) fillEmbedding(ctx context.Context, feeds []*model.Feed) ([]*chunk.Feed, error) {
-	embedded := make([]*chunk.Feed, len(feeds))
+	embedded := make([]*chunk.Feed, 0, len(feeds))
 	llm := b.Dependencies().LLMFactory.Get(b.Config().embeddingLLM)
 	var wg sync.WaitGroup
 	var mu sync.Mutex
@@ -1336,16 +1301,21 @@ func (b *block) fillEmbedding(ctx context.Context, feeds []*model.Feed) ([]*chun
 			}
 
 			mu.Lock()
-			embedded[i] = &chunk.Feed{
+			embedded = append(embedded, &chunk.Feed{
 				Feed:    feed,
 				Vectors: vectors,
-			}
+			})
 			mu.Unlock()
 		}(i, feed)
 	}
 	wg.Wait()
-	if len(errs) > 0 {
-		return nil, errs[0]
+
+	switch len(errs) {
+	case 0:
+	case len(feeds):
+		return nil, errs[0] // All failed.
+	default:
+		log.Error(ctx, errors.Wrap(errs[0], "fill embedding"), "error_count", len(errs))
 	}
 
 	return embedded, nil

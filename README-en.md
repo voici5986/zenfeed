@@ -73,7 +73,7 @@ Just for the exquisite email styles, install and use it now!
 
 ### 1. Installation
 
-By default, uses SiliconFlow's Qwen/Qwen2.5-7B-Instruct (free) and Pro/BAAI/bge-m3. If you don't have a SiliconFlow account yet, use this [invitation link](https://cloud.siliconflow.cn/i/U2VS0Q5A) to get a ¥14 credit.
+By default, uses SiliconFlow's Qwen/Qwen3-8B (free) and Pro/BAAI/bge-m3. If you don't have a SiliconFlow account yet, use this [invitation link](https://cloud.siliconflow.cn/i/U2VS0Q5A) to get a ¥14 credit.
 
 Support for other vendors or models is available; follow the instructions below.
 
@@ -84,7 +84,7 @@ curl -L -O https://raw.githubusercontent.com/glidea/zenfeed/main/docker-compose.
 
 # If you need to customize more configuration parameters, directly edit docker-compose.yml#configs.zenfeed_config.content BEFORE running the command below.
 # Configuration Docs: https://github.com/glidea/zenfeed/blob/main/docs/config.md
-API_KEY=your_apikey TZ=your_local_IANA LANG=English  docker-compose -p zenfeed up -d
+API_KEY=your_apikey TZ=your_local_IANA LANGUAGE=English  docker-compose -p zenfeed up -d
 ```
 
 #### Windows
@@ -94,7 +94,7 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/glidea/zenfeed/main/do
 
 # If you need to customize more configuration parameters, directly edit docker-compose.yml#configs.zenfeed_config.content BEFORE running the command below.
 # Configuration Docs: https://github.com/glidea/zenfeed/blob/main/docs/config.md
-$env:API_KEY = "your_apikey"; $env:TZ = "your_local_IANA"; $env:LANG = "English"; docker-compose -p zenfeed up -d
+$env:API_KEY = "your_apikey"; $env:TZ = "your_local_IANA"; $env:LANGUAGE = "English"; docker-compose -p zenfeed up -d
 ```
 
 ### 2. Using the Web UI

@@ -86,9 +86,9 @@ func (c *Config) From(app *config.App) *Config {
 		if app.Notify.Receivers[i].Email != "" {
 			c.Receivers[i].Email = app.Notify.Receivers[i].Email
 		}
-		// if app.Notify.Receivers[i].Webhook != nil {
-		// 	c.Receivers[i].Webhook = &channel.WebhookReceiver{URL: app.Notify.Receivers[i].Webhook.URL}
-		// }
+		if app.Notify.Receivers[i].Webhook != nil {
+			c.Receivers[i].Webhook = &channel.WebhookReceiver{URL: app.Notify.Receivers[i].Webhook.URL}
+		}
 	}
 
 	c.Channels = channel.Config{}
@@ -438,8 +438,8 @@ func (n *notifier) send(ctx context.Context, work sendWork) error {
 	return channel.Send(ctx, work.receiver.Receiver, work.group)
 }
 
-var nlogKey = func(group *route.FeedGroup, receiver Receiver) string {
-	return fmt.Sprintf("notifier.group.%s.receiver.%s.%d", group.Name, receiver.Name, group.Time.Unix())
+var nlogKey = func(group *route.FeedGroup, receiver Receiver) []byte {
+	return fmt.Appendf(nil, "notifier.group.%s.receiver.%s.%d", group.Name, receiver.Name, group.Time.Unix())
 }
 
 func (n *notifier) isSent(ctx context.Context, group *route.FeedGroup, receiver Receiver) bool {
@@ -457,7 +457,7 @@ func (n *notifier) isSent(ctx context.Context, group *route.FeedGroup, receiver 
 }
 
 func (n *notifier) markSent(ctx context.Context, group *route.FeedGroup, receiver Receiver) error {
-	return n.Dependencies().KVStorage.Set(ctx, nlogKey(group, receiver), timeutil.Format(time.Now()), timeutil.Day)
+	return n.Dependencies().KVStorage.Set(ctx, nlogKey(group, receiver), []byte(timeutil.Format(time.Now())), timeutil.Day)
 }
 
 type sendWork struct {

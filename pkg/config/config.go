@@ -46,10 +46,13 @@ type Config struct {
 }
 
 type App struct {
-	Timezone string `yaml:"timezone,omitempty" json:"timezone,omitempty" desc:"The timezone of the app. e.g. Asia/Shanghai. Default: server's local timezone"`
-	Log      struct {
-		Level string `yaml:"level,omitempty" json:"level,omitempty" desc:"Log level, one of debug, info, warn, error. Default: info"`
-	} `yaml:"log,omitempty" json:"log,omitempty" desc:"The log config."`
+	Timezone  string `yaml:"timezone,omitempty" json:"timezone,omitempty" desc:"The timezone of the app. e.g. Asia/Shanghai. Default: server's local timezone"`
+	Telemetry struct {
+		Address string `yaml:"address,omitempty" json:"address,omitempty" desc:"The address ([host]:port) of the telemetry server. e.g. 0.0.0.0:9090. Default: :9090. It can not be changed after the app is running."`
+		Log     struct {
+			Level string `yaml:"level,omitempty" json:"level,omitempty" desc:"Log level, one of debug, info, warn, error. Default: info"`
+		} `yaml:"log,omitempty" json:"log,omitempty" desc:"The log config."`
+	} `yaml:"telemetry,omitempty" json:"telemetry,omitempty" desc:"The telemetry config."`
 	API struct {
 		HTTP struct {
 			Address string `yaml:"address,omitempty" json:"address,omitempty" desc:"The address ([host]:port) of the HTTP API. e.g. 0.0.0.0:1300. Default: :1300. It can not be changed after the app is running."`
@@ -57,9 +60,16 @@ type App struct {
 		MCP struct {
 			Address string `yaml:"address,omitempty" json:"address,omitempty" desc:"The address ([host]:port) of the MCP API. e.g. 0.0.0.0:1300. Default: :1301. It can not be changed after the app is running."`
 		} `yaml:"mcp,omitempty" json:"mcp,omitempty" desc:"The MCP API config."`
+		RSS struct {
+			Address             string `yaml:"address,omitempty" json:"address,omitempty" desc:"The address ([host]:port) of the RSS API. e.g. 0.0.0.0:1300. Default: :1302. It can not be changed after the app is running."`
+			ContentHTMLTemplate string `yaml:"content_html_template,omitempty" json:"content_html_template,omitempty" desc:"The template to render the RSS content for each item. Default is {{ .summary_html_snippet }}."`
+		} `yaml:"rss,omitempty" json:"rss,omitempty" desc:"The RSS config."`
 		LLM string `yaml:"llm,omitempty" json:"llm,omitempty" desc:"The LLM name for summarizing feeds. e.g. my-favorite-gemini-king. Default is the default LLM in llms section."`
 	} `yaml:"api,omitempty" json:"api,omitempty" desc:"The API config."`
-	LLMs     []LLM   `yaml:"llms,omitempty" json:"llms,omitempty" desc:"The LLMs config. It is required, at least one LLM is needed, refered by other config sections."`
+	LLMs []LLM `yaml:"llms,omitempty" json:"llms,omitempty" desc:"The LLMs config. It is required, at least one LLM is needed, refered by other config sections."`
+	Jina struct {
+		Token string `yaml:"token,omitempty" json:"token,omitempty" desc:"The token of the Jina server."`
+	} `yaml:"jina,omitempty" json:"jina,omitempty" desc:"The Jina config."`
 	Scrape   Scrape  `yaml:"scrape,omitempty" json:"scrape,omitempty" desc:"The scrape config."`
 	Storage  Storage `yaml:"storage,omitempty" json:"storage,omitempty" desc:"The storage config."`
 	Scheduls struct {
@@ -116,6 +126,7 @@ type ScrapeSourceRSS struct {
 }
 
 type RewriteRule struct {
+	If                    []string              `yaml:"if,omitempty" json:"if,omitempty" desc:"The condition config to match the feed. If not set, that means match all feeds. Like label filters, e.g. [source=github, title!=xxx]"`
 	SourceLabel           string                `yaml:"source_label,omitempty" json:"source_label,omitempty" desc:"The feed label of the source text to transform. Default is the 'content' label. The feed is essentially a label set (similar to Prometheus metric data). The default labels are type (rss, email (in future), etc), source (the source name), title (feed title), link (feed link), pub_time (feed publish time), and content (feed content)."`
 	SkipTooShortThreshold *int                  `yaml:"skip_too_short_threshold,omitempty" json:"skip_too_short_threshold,omitempty" desc:"The threshold of the source text length to skip. Default is 300. It helps we to filter out some short feeds."`
 	Transform             *RewriteRuleTransform `yaml:"transform,omitempty" json:"transform,omitempty" desc:"The transform config to transform the source text. If not set, that means transform nothing, so the source text is the transformed text."`
@@ -130,6 +141,7 @@ type RewriteRuleTransform struct {
 }
 
 type RewriteRuleTransformToText struct {
+	Type   string `yaml:"type,omitempty" json:"type,omitempty" desc:"The type of the transform. It can be one of prompt, crawl, crawl_by_jina. Default is prompt. For crawl, the source text will be as the url to crawl the page, and the page will be converted to markdown. crawl vs crawl_by_jina: crawl is local, more stable; crawl_by_jina is powered by https://jina.ai, more powerful."`
 	LLM    string `yaml:"llm,omitempty" json:"llm,omitempty" desc:"The LLM name to use. Default is the default LLM in llms section."`
 	Prompt string `yaml:"prompt,omitempty" json:"prompt,omitempty" desc:"The prompt to transform the source text. The source text will be injected into the prompt above. And you can use go template syntax to refer some built-in prompts, like {{ .summary }}. Available built-in prompts: category, tags, score, comment_confucius, summary, summary_html_snippet."`
 }
@@ -166,15 +178,14 @@ type NotifySubRoute struct {
 }
 
 type NotifyReceiver struct {
-	Name  string `yaml:"name,omitempty" json:"name,omitempty" desc:"The name of the receiver. It is required."`
-	Email string `yaml:"email,omitempty" json:"email,omitempty" desc:"The email of the receiver."`
-	// TODO: to reduce copyright risk, we do not support webhook receiver now.
-	// Webhook *NotifyReceiverWebhook `yaml:"webhook" json:"webhook" desc:"The webhook of the receiver."`
+	Name    string                 `yaml:"name,omitempty" json:"name,omitempty" desc:"The name of the receiver. It is required."`
+	Email   string                 `yaml:"email,omitempty" json:"email,omitempty" desc:"The email of the receiver."`
+	Webhook *NotifyReceiverWebhook `yaml:"webhook" json:"webhook" desc:"The webhook of the receiver."`
 }
 
-// type NotifyReceiverWebhook struct {
-// 	URL string `yaml:"url"`
-// }
+type NotifyReceiverWebhook struct {
+	URL string `yaml:"url"`
+}
 
 type NotifyChannels struct {
 	Email *NotifyChannelEmail `yaml:"email,omitempty" json:"email,omitempty" desc:"The global email channel config."`

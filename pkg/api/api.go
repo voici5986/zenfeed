@@ -37,7 +37,6 @@ import (
 	telemetry "github.com/glidea/zenfeed/pkg/telemetry"
 	telemetrymodel "github.com/glidea/zenfeed/pkg/telemetry/model"
 	jsonschema "github.com/glidea/zenfeed/pkg/util/json_schema"
-	"github.com/glidea/zenfeed/pkg/util/rpc"
 )
 
 // --- Interface code block ---
@@ -161,11 +160,11 @@ type QueryRequest struct {
 }
 
 func (r *QueryRequest) Validate() error { //nolint:cyclop
-	if r.Query != "" && utf8.RuneCountInString(r.Query) < 5 {
-		return errors.New("query must be at least 5 characters")
+	if r.Query != "" && utf8.RuneCountInString(r.Query) > 64 {
+		return errors.New("query must be at most 64 characters")
 	}
 	if r.Threshold == 0 {
-		r.Threshold = 0.55
+		r.Threshold = 0.5
 	}
 	if r.Threshold < 0 || r.Threshold > 1 {
 		return errors.New("threshold must be between 0 and 1")
@@ -199,6 +198,28 @@ type QueryResponse struct {
 	Feeds   []*block.FeedVO `json:"feeds"`
 	Count   int             `json:"count"`
 }
+
+type Error struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+func (e Error) Error() string {
+	return e.Message
+}
+
+func newError(code int, err error) Error {
+	return Error{
+		Code:    code,
+		Message: err.Error(),
+	}
+}
+
+var (
+	ErrBadRequest = func(err error) Error { return newError(http.StatusBadRequest, err) }
+	ErrNotFound   = func(err error) Error { return newError(http.StatusNotFound, err) }
+	ErrInternal   = func(err error) Error { return newError(http.StatusInternalServerError, err) }
+)
 
 // --- Factory code block ---
 type Factory component.Factory[API, config.App, Dependencies]
@@ -262,7 +283,7 @@ func (a *api) QueryAppConfigSchema(
 ) (resp *QueryAppConfigSchemaResponse, err error) {
 	schema, err := jsonschema.ForType(reflect.TypeOf(config.App{}))
 	if err != nil {
-		return nil, rpc.ErrInternal(errors.Wrap(err, "query app config schema"))
+		return nil, ErrInternal(errors.Wrap(err, "query app config schema"))
 	}
 
 	return (*QueryAppConfigSchemaResponse)(&schema), nil
@@ -282,7 +303,7 @@ func (a *api) ApplyAppConfig(
 	req *ApplyAppConfigRequest,
 ) (resp *ApplyAppConfigResponse, err error) {
 	if err := a.Dependencies().ConfigManager.SaveAppConfig(&req.App); err != nil {
-		return nil, rpc.ErrBadRequest(errors.Wrap(err, "save app config"))
+		return nil, ErrBadRequest(errors.Wrap(err, "save app config"))
 	}
 
 	return &ApplyAppConfigResponse{}, nil
@@ -297,20 +318,20 @@ func (a *api) QueryRSSHubCategories(
 	// New request.
 	forwardReq, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return nil, rpc.ErrInternal(errors.Wrap(err, "new request"))
+		return nil, ErrInternal(errors.Wrap(err, "new request"))
 	}
 
 	// Do request.
 	forwardRespIO, err := a.hc.Do(forwardReq)
 	if err != nil {
-		return nil, rpc.ErrInternal(errors.Wrap(err, "query rss hub websites"))
+		return nil, ErrInternal(errors.Wrap(err, "query rss hub websites"))
 	}
 	defer func() { _ = forwardRespIO.Body.Close() }()
 
 	// Parse response.
 	var forwardResp map[string]RSSHubWebsite
 	if err := json.NewDecoder(forwardRespIO.Body).Decode(&forwardResp); err != nil {
-		return nil, rpc.ErrInternal(errors.Wrap(err, "parse response"))
+		return nil, ErrInternal(errors.Wrap(err, "parse response"))
 	}
 
 	// Convert to response.
@@ -333,7 +354,7 @@ func (a *api) QueryRSSHubWebsites(
 	ctx context.Context, req *QueryRSSHubWebsitesRequest,
 ) (resp *QueryRSSHubWebsitesResponse, err error) {
 	if req.Category == "" {
-		return nil, rpc.ErrBadRequest(errors.New("category is required"))
+		return nil, ErrBadRequest(errors.New("category is required"))
 	}
 
 	url := a.Config().RSSHubEndpoint + "/api/category/" + req.Category
@@ -341,29 +362,29 @@ func (a *api) QueryRSSHubWebsites(
 	// New request.
 	forwardReq, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return nil, rpc.ErrInternal(errors.Wrap(err, "new request"))
+		return nil, ErrInternal(errors.Wrap(err, "new request"))
 	}
 
 	// Do request.
 	forwardRespIO, err := a.hc.Do(forwardReq)
 	if err != nil {
-		return nil, rpc.ErrInternal(errors.Wrap(err, "query rss hub routes"))
+		return nil, ErrInternal(errors.Wrap(err, "query rss hub routes"))
 	}
 	defer func() { _ = forwardRespIO.Body.Close() }()
 
 	// Parse response.
 	body, err := io.ReadAll(forwardRespIO.Body)
 	if err != nil {
-		return nil, rpc.ErrInternal(errors.Wrap(err, "read response"))
+		return nil, ErrInternal(errors.Wrap(err, "read response"))
 	}
 	if len(body) == 0 {
 		// Hack for RSSHub...
 		// Consider cache category ids for validate by self to remove this shit code.
-		return nil, rpc.ErrBadRequest(errors.New("category id is invalid"))
+		return nil, ErrBadRequest(errors.New("category id is invalid"))
 	}
 	var forwardResp map[string]RSSHubWebsite
 	if err := json.Unmarshal(body, &forwardResp); err != nil {
-		return nil, rpc.ErrInternal(errors.Wrap(err, "parse response"))
+		return nil, ErrInternal(errors.Wrap(err, "parse response"))
 	}
 
 	// Convert to response.
@@ -383,7 +404,7 @@ func (a *api) QueryRSSHubRoutes(
 	req *QueryRSSHubRoutesRequest,
 ) (resp *QueryRSSHubRoutesResponse, err error) {
 	if req.WebsiteID == "" {
-		return nil, rpc.ErrBadRequest(errors.New("website id is required"))
+		return nil, ErrBadRequest(errors.New("website id is required"))
 	}
 
 	url := a.Config().RSSHubEndpoint + "/api/namespace/" + req.WebsiteID
@@ -391,30 +412,30 @@ func (a *api) QueryRSSHubRoutes(
 	// New request.
 	forwardReq, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return nil, rpc.ErrInternal(errors.Wrap(err, "new request"))
+		return nil, ErrInternal(errors.Wrap(err, "new request"))
 	}
 
 	// Do request.
 	forwardRespIO, err := a.hc.Do(forwardReq)
 	if err != nil {
-		return nil, rpc.ErrInternal(errors.Wrap(err, "query rss hub routes"))
+		return nil, ErrInternal(errors.Wrap(err, "query rss hub routes"))
 	}
 	defer func() { _ = forwardRespIO.Body.Close() }()
 
 	// Parse response.
 	body, err := io.ReadAll(forwardRespIO.Body)
 	if err != nil {
-		return nil, rpc.ErrInternal(errors.Wrap(err, "read response"))
+		return nil, ErrInternal(errors.Wrap(err, "read response"))
 	}
 	if len(body) == 0 {
-		return nil, rpc.ErrBadRequest(errors.New("website id is invalid"))
+		return nil, ErrBadRequest(errors.New("website id is invalid"))
 	}
 
 	var forwardResp struct {
 		Routes map[string]RSSHubRoute `json:"routes"`
 	}
 	if err := json.Unmarshal(body, &forwardResp); err != nil {
-		return nil, rpc.ErrInternal(errors.Wrap(err, "parse response"))
+		return nil, ErrInternal(errors.Wrap(err, "parse response"))
 	}
 
 	// Convert to response.
@@ -435,7 +456,7 @@ func (a *api) Write(ctx context.Context, req *WriteRequest) (resp *WriteResponse
 		feed.Labels.Put(model.LabelType, "api", false)
 	}
 	if err := a.Dependencies().FeedStorage.Append(ctx, req.Feeds...); err != nil {
-		return nil, rpc.ErrInternal(errors.Wrap(err, "append"))
+		return nil, ErrInternal(errors.Wrap(err, "append"))
 	}
 
 	return &WriteResponse{}, nil
@@ -447,7 +468,7 @@ func (a *api) Query(ctx context.Context, req *QueryRequest) (resp *QueryResponse
 
 	// Validate request.
 	if err := req.Validate(); err != nil {
-		return nil, rpc.ErrBadRequest(errors.Wrap(err, "validate"))
+		return nil, ErrBadRequest(errors.Wrap(err, "validate"))
 	}
 
 	// Forward to storage.
@@ -460,7 +481,7 @@ func (a *api) Query(ctx context.Context, req *QueryRequest) (resp *QueryResponse
 		End:          req.End,
 	})
 	if err != nil {
-		return nil, rpc.ErrInternal(errors.Wrap(err, "query"))
+		return nil, ErrInternal(errors.Wrap(err, "query"))
 	}
 	if len(feeds) == 0 {
 		return &QueryResponse{Feeds: []*block.FeedVO{}}, nil

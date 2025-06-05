@@ -124,10 +124,9 @@ func (c *aggrChannel) Send(ctx context.Context, receiver Receiver, group *route.
 	if receiver.Email != "" && c.email != nil {
 		return c.send(ctx, receiver, group, c.email, "email")
 	}
-	// if receiver.Webhook != nil && c.webhook != nil {
-	// TODO: temporarily disable webhook to reduce copyright risks.
-	// return c.send(ctx, receiver, group, c.webhook, "webhook")
-	// }
+	if receiver.Webhook != nil && c.webhook != nil {
+		return c.send(ctx, receiver, group, c.webhook, "webhook")
+	}
 	return nil
 }
 

@@ -65,7 +65,6 @@ func newRSSReader(config *ScrapeSourceRSS) (reader, error) {
 }
 
 // --- Implementation code block ---
-
 type rssReader struct {
 	config *ScrapeSourceRSS
 	client client

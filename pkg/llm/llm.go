@@ -16,6 +16,7 @@
 package llm
 
 import (
+	"bytes"
 	"context"
 	"reflect"
 	"strconv"
@@ -33,6 +34,8 @@ import (
 	"github.com/glidea/zenfeed/pkg/storage/kv"
 	"github.com/glidea/zenfeed/pkg/telemetry/log"
 	telemetrymodel "github.com/glidea/zenfeed/pkg/telemetry/model"
+	binaryutil "github.com/glidea/zenfeed/pkg/util/binary"
+	"github.com/glidea/zenfeed/pkg/util/buffer"
 	"github.com/glidea/zenfeed/pkg/util/hash"
 )
 
@@ -373,24 +376,94 @@ func newCached(llm LLM, kvStorage kv.Storage) LLM {
 
 func (c *cached) String(ctx context.Context, messages []string) (string, error) {
 	key := hash.Sum64s(messages)
-	keyStr := strconv.FormatUint(key, 10)
+	keyStr := strconv.FormatUint(key, 10) // for human readable & compatible.
 
-	value, err := c.kvStorage.Get(ctx, keyStr)
+	valueBs, err := c.kvStorage.Get(ctx, []byte(keyStr))
 	switch {
 	case err == nil:
-		return value, nil
+		return string(valueBs), nil
 	case errors.Is(err, kv.ErrNotFound):
 		break
 	default:
 		return "", errors.Wrap(err, "get from kv storage")
 	}
 
-	value, err = c.LLM.String(ctx, messages)
+	value, err := c.LLM.String(ctx, messages)
 	if err != nil {
 		return "", err
 	}
 
-	if err = c.kvStorage.Set(ctx, keyStr, value, 65*time.Minute); err != nil {
+	// TODO: reduce copies.
+	if err = c.kvStorage.Set(ctx, []byte(keyStr), []byte(value), 65*time.Minute); err != nil {
+		log.Error(ctx, err, "set to kv storage")
+	}
+
+	return value, nil
+}
+
+var (
+	toBytes = func(v []float32) ([]byte, error) {
+		buf := buffer.Get()
+		defer buffer.Put(buf)
+
+		for _, fVal := range v {
+			if err := binaryutil.WriteFloat32(buf, fVal); err != nil {
+				return nil, errors.Wrap(err, "write float32")
+			}
+		}
+
+		// Must copy data, as the buffer will be reused.
+		bs := make([]byte, buf.Len())
+		copy(bs, buf.Bytes())
+
+		return bs, nil
+	}
+
+	toF32s = func(bs []byte) ([]float32, error) {
+		if len(bs)%4 != 0 {
+			return nil, errors.New("embedding data is corrupted, length not multiple of 4")
+		}
+
+		r := bytes.NewReader(bs)
+		floats := make([]float32, len(bs)/4)
+
+		for i := range floats {
+			f, err := binaryutil.ReadFloat32(r)
+			if err != nil {
+				return nil, errors.Wrap(err, "deserialize float32")
+			}
+			floats[i] = f
+		}
+
+		return floats, nil
+	}
+)
+
+func (c *cached) Embedding(ctx context.Context, text string) ([]float32, error) {
+	key := hash.Sum64(text)
+	keyStr := strconv.FormatUint(key, 10)
+
+	valueBs, err := c.kvStorage.Get(ctx, []byte(keyStr))
+	switch {
+	case err == nil:
+		return toF32s(valueBs)
+	case errors.Is(err, kv.ErrNotFound):
+		break
+	default:
+		return nil, errors.Wrap(err, "get from kv storage")
+	}
+
+	value, err := c.LLM.Embedding(ctx, text)
+	if err != nil {
+		return nil, err
+	}
+
+	valueBs, err = toBytes(value)
+	if err != nil {
+		return nil, errors.Wrap(err, "serialize embedding")
+	}
+
+	if err = c.kvStorage.Set(ctx, []byte(keyStr), valueBs, 65*time.Minute); err != nil {
 		log.Error(ctx, err, "set to kv storage")
 	}
 

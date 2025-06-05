@@ -134,53 +134,53 @@ func (e *email) buildEmail(receiver Receiver, group *route.FeedGroup) (*gomail.M
 	if err != nil {
 		return nil, errors.Wrap(err, "build email body HTML")
 	}
-	m.SetBody("text/html", string(body))
+	m.SetBody("text/html", body)
 
 	return m, nil
 }
 
-func (e *email) buildBodyHTML(group *route.FeedGroup) ([]byte, error) {
+func (e *email) buildBodyHTML(group *route.FeedGroup) (string, error) {
 	bodyBuf := buffer.Get()
 	defer buffer.Put(bodyBuf)
 
 	// Write HTML header.
 	if err := e.writeHTMLHeader(bodyBuf); err != nil {
-		return nil, errors.Wrap(err, "write HTML header")
+		return "", errors.Wrap(err, "write HTML header")
 	}
 
 	// Write summary.
 	if err := e.writeSummary(bodyBuf, group.Summary); err != nil {
-		return nil, errors.Wrap(err, "write summary")
+		return "", errors.Wrap(err, "write summary")
 	}
 
 	// Write each feed content.
 	if _, err := bodyBuf.WriteString(`
       <div style="margin-top:20px; padding-top:15px; border-top:1px solid #f1f3f4;">
         <p style="font-size:32px; font-weight:500; margin:0 0 10px 0;">Feeds</p>`); err != nil {
-		return nil, errors.Wrap(err, "write feeds header")
+		return "", errors.Wrap(err, "write feeds header")
 	}
 	for i, feed := range group.Feeds {
 		if err := e.writeFeedContent(bodyBuf, feed); err != nil {
-			return nil, errors.Wrap(err, "write feed content")
+			return "", errors.Wrap(err, "write feed content")
 		}
 
 		// Add separator (except the last feed).
 		if i < len(group.Feeds)-1 {
 			if err := e.writeSeparator(bodyBuf); err != nil {
-				return nil, errors.Wrap(err, "write separator")
+				return "", errors.Wrap(err, "write separator")
 			}
 		}
 	}
 
 	// Write disclaimer and HTML footer.
 	if err := e.writeDisclaimer(bodyBuf); err != nil {
-		return nil, errors.Wrap(err, "write disclaimer")
+		return "", errors.Wrap(err, "write disclaimer")
 	}
 	if err := e.writeHTMLFooter(bodyBuf); err != nil {
-		return nil, errors.Wrap(err, "write HTML footer")
+		return "", errors.Wrap(err, "write HTML footer")
 	}
 
-	return bodyBuf.Bytes(), nil
+	return bodyBuf.String(), nil
 }
 
 func (e *email) writeHTMLHeader(buf *buffer.Bytes) error {

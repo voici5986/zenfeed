@@ -27,6 +27,8 @@ import (
 
 	"github.com/pkg/errors"
 	slogdedup "github.com/veqryn/slog-dedup"
+
+	"github.com/glidea/zenfeed/pkg/model"
 )
 
 type Level string
@@ -187,7 +189,8 @@ func getStack(skip, depth int) string {
 		}
 		first = false
 
-		b.WriteString(frame.Function)
+		fn := strings.TrimPrefix(frame.Function, model.Module) // no module prefix for zenfeed self.
+		b.WriteString(fn)
 		b.WriteByte(':')
 		b.WriteString(strconv.Itoa(frame.Line))
 	}

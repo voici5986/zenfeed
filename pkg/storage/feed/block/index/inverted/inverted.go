@@ -24,7 +24,7 @@ type Index interface {
 	index.Codec
 
 	// Search returns item IDs matching the given label and value.
-	Search(ctx context.Context, label string, eq bool, value string) (ids map[uint64]struct{})
+	Search(ctx context.Context, matcher model.LabelFilter) (ids map[uint64]struct{})
 	// Add adds item to the index.
 	// If label or value in labels is empty, it will be ignored.
 	// If value is too long, it will be ignored,
@@ -88,17 +88,17 @@ type idx struct {
 	mu  sync.RWMutex
 }
 
-func (idx *idx) Search(ctx context.Context, label string, eq bool, value string) (ids map[uint64]struct{}) {
+func (idx *idx) Search(ctx context.Context, matcher model.LabelFilter) (ids map[uint64]struct{}) {
 	ctx = telemetry.StartWith(ctx, append(idx.TelemetryLabels(), telemetrymodel.KeyOperation, "Search")...)
 	defer func() { telemetry.End(ctx, nil) }()
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
 
-	if value == "" {
-		return idx.searchEmptyValue(label, eq)
+	if matcher.Value == "" {
+		return idx.searchEmptyValue(matcher.Label, matcher.Equal)
 	}
 
-	return idx.searchNonEmptyValue(label, eq, value)
+	return idx.searchNonEmptyValue(matcher)
 }
 
 func (idx *idx) Add(ctx context.Context, id uint64, labels model.Labels) {
@@ -198,16 +198,16 @@ func (idx *idx) searchEmptyValue(label string, eq bool) map[uint64]struct{} {
 // searchNonEmptyValue handles the search logic when the target value is not empty.
 // If eq is true, it returns IDs that have the exact label-value pair.
 // If eq is false, it returns IDs that *do not* have the exact label-value pair.
-func (idx *idx) searchNonEmptyValue(label string, eq bool, value string) map[uint64]struct{} {
+func (idx *idx) searchNonEmptyValue(matcher model.LabelFilter) map[uint64]struct{} {
 	// Get the map of values for the given label.
-	values, labelExists := idx.m[label]
+	values, labelExists := idx.m[matcher.Label]
 
 	// If equal (eq), find the exact match.
-	if eq {
+	if matcher.Equal {
 		if !labelExists {
 			return make(map[uint64]struct{}) // Label doesn't exist.
 		}
-		ids, valueExists := values[value]
+		ids, valueExists := values[matcher.Value]
 		if !valueExists {
 			return make(map[uint64]struct{}) // Value doesn't exist for this label.
 		}
@@ -221,7 +221,7 @@ func (idx *idx) searchNonEmptyValue(label string, eq bool, value string) map[uin
 	resultIDs := maps.Clone(idx.ids)
 	if labelExists {
 		// If the specific label-value pair exists, remove its associated IDs.
-		if matchingIDs, valueExists := values[value]; valueExists {
+		if matchingIDs, valueExists := values[matcher.Value]; valueExists {
 			for id := range matchingIDs {
 				delete(resultIDs, id)
 			}
@@ -413,8 +413,8 @@ type mockIndex struct {
 	component.Mock
 }
 
-func (m *mockIndex) Search(ctx context.Context, label string, eq bool, value string) (ids map[uint64]struct{}) {
-	args := m.Called(ctx, label, eq, value)
+func (m *mockIndex) Search(ctx context.Context, matcher model.LabelFilter) (ids map[uint64]struct{}) {
+	args := m.Called(ctx, matcher)
 
 	return args.Get(0).(map[uint64]struct{})
 }

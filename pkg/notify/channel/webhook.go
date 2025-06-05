@@ -41,9 +41,10 @@ func (r *WebhookReceiver) Validate() error {
 }
 
 type webhookBody struct {
-	Group  string        `json:"group"`
-	Labels model.Labels  `json:"labels"`
-	Feeds  []*route.Feed `json:"feeds"`
+	Group   string        `json:"group"`
+	Labels  model.Labels  `json:"labels"`
+	Summary string        `json:"summary"`
+	Feeds   []*route.Feed `json:"feeds"`
 }
 
 func newWebhook() sender {
@@ -59,9 +60,10 @@ type webhook struct {
 func (w *webhook) Send(ctx context.Context, receiver Receiver, group *route.FeedGroup) error {
 	// Prepare request.
 	body := &webhookBody{
-		Group:  group.Name,
-		Labels: group.Labels,
-		Feeds:  group.Feeds,
+		Group:   group.Name,
+		Labels:  group.Labels,
+		Summary: group.Summary,
+		Feeds:   group.Feeds,
 	}
 	b := runtimeutil.Must1(json.Marshal(body))
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, receiver.Webhook.URL, bytes.NewReader(b))

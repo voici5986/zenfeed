@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-package rpc
+package jsonrpc
 
 import (
 	"bytes"
@@ -27,6 +27,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
+	"github.com/glidea/zenfeed/pkg/api"
 	"github.com/glidea/zenfeed/pkg/test"
 )
 
@@ -58,15 +59,15 @@ func TestAPI(t *testing.T) {
 	}
 
 	badRequestHandler := func(ctx context.Context, req *TestRequest) (*TestResponse, error) {
-		return nil, ErrBadRequest(errors.New("invalid request"))
+		return nil, api.ErrBadRequest(errors.New("invalid request"))
 	}
 
 	notFoundHandler := func(ctx context.Context, req *TestRequest) (*TestResponse, error) {
-		return nil, ErrNotFound(errors.New("resource not found"))
+		return nil, api.ErrNotFound(errors.New("resource not found"))
 	}
 
 	internalErrorHandler := func(ctx context.Context, req *TestRequest) (*TestResponse, error) {
-		return nil, ErrInternal(errors.New("server error"))
+		return nil, api.ErrInternal(errors.New("server error"))
 	}
 
 	genericErrorHandler := func(ctx context.Context, req *TestRequest) (*TestResponse, error) {
