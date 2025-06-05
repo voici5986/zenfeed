@@ -19,6 +19,9 @@
 * [LinuxDO](https://linuxdo.analysis.zenfeed.xyz/)
 
 ---
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/glidea/zenfeed)
+**！！DeepWiki 的描述并不准确！！！**，但问答质量还行
+
 技术说明文档见：[HLD](docs/tech/hld-zh.md)
 
 ## 前言
