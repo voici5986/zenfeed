@@ -18,7 +18,6 @@ package llm
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	"github.com/pkg/errors"
 	oai "github.com/sashabaranov/go-openai"
@@ -132,7 +131,6 @@ func (o *openai) Embedding(ctx context.Context, s string) (value []float32, err 
 		EncodingFormat: oai.EmbeddingEncodingFormatFloat,
 	})
 	if err != nil {
-		fmt.Println(s)
 		return nil, errors.Wrap(err, "create embeddings")
 	}
 	if len(vec.Data) == 0 {

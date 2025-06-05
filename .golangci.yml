@@ -28,7 +28,6 @@ linters:
     - importas
     - inamedparam
     - intrange
-    - lll
     - maintidx
     - nestif
     - nlreturn

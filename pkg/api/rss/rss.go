@@ -16,7 +16,6 @@
 package rss
 
 import (
-	"fmt"
 	"net"
 	"net/http"
 	"text/template"
@@ -185,12 +184,13 @@ func (s *server) rss(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest) // TODO: standardize error handling.
+
 		return
 	}
 
 	// Render and convert to RSS.
 	rssObj := &feeds.Feed{
-		Title:       fmt.Sprintf("Zenfeed RSS - %s", ps.Encode()),
+		Title:       "Zenfeed RSS - " + ps.Encode(),
 		Description: "Powered by Github Zenfeed - https://github.com/glidea/zenfeed. If you use Folo, please enable 'Appearance - Content - Render inline styles'",
 		Items:       make([]*feeds.Item, 0, len(queryResult.Feeds)),
 	}
@@ -203,6 +203,7 @@ func (s *server) rss(w http.ResponseWriter, r *http.Request) {
 
 		if err = s.Config().contentHTMLTemplate.Execute(buf, feed.Labels.Map()); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+
 			return
 		}
 
@@ -218,6 +219,7 @@ func (s *server) rss(w http.ResponseWriter, r *http.Request) {
 
 	if err = rssObj.WriteRss(w); err != nil {
 		log.Error(ctx, errors.Wrap(err, "write rss response"))
+
 		return
 	}
 }

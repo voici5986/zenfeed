@@ -127,6 +127,7 @@ func (c *aggrChannel) Send(ctx context.Context, receiver Receiver, group *route.
 	if receiver.Webhook != nil && c.webhook != nil {
 		return c.send(ctx, receiver, group, c.webhook, "webhook")
 	}
+
 	return nil
 }
 

@@ -48,7 +48,7 @@ func (c *local) Markdown(ctx context.Context, u string) ([]byte, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "fetch %s", u)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Parse the response.
 	if resp.StatusCode != http.StatusOK {
@@ -107,7 +107,7 @@ func (c *local) getRobotsData(ctx context.Context, host string) (*robotstxt.Robo
 	if err != nil {
 		return nil, errors.Wrapf(err, "fetch %s", robotsURL)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Parse the response.
 	switch resp.StatusCode {
@@ -117,11 +117,15 @@ func (c *local) getRobotsData(ctx context.Context, host string) (*robotstxt.Robo
 			return nil, errors.Wrapf(err, "parse robots.txt from %s", robotsURL)
 		}
 		c.robotsDataCache.Store(host, data)
+
 		return data, nil
+
 	case http.StatusNotFound:
 		data := &robotstxt.RobotsData{}
 		c.robotsDataCache.Store(host, data)
+
 		return data, nil
+
 	case http.StatusUnauthorized, http.StatusForbidden:
 		return nil, errors.Errorf("access to %s denied (status %d)", robotsURL, resp.StatusCode)
 	default:
@@ -145,7 +149,7 @@ func NewJina(token string) Crawler {
 }
 
 func (c *jina) Markdown(ctx context.Context, u string) ([]byte, error) {
-	proxyURL := fmt.Sprintf("https://r.jina.ai/%s", u)
+	proxyURL := "https://r.jina.ai/" + u
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, proxyURL, nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "create request for %s", u)
@@ -154,14 +158,14 @@ func (c *jina) Markdown(ctx context.Context, u string) ([]byte, error) {
 	req.Header.Set("X-Engine", "browser")
 	req.Header.Set("X-Robots-Txt", userAgent)
 	if c.token != "" {
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.token))
+		req.Header.Set("Authorization", "Bearer "+c.token)
 	}
 
 	resp, err := c.hc.Do(req)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fetch %s", proxyURL)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.Errorf("received non-200 status code %d from %s", resp.StatusCode, proxyURL)

@@ -101,7 +101,7 @@ type Rule struct {
 	Label string
 }
 
-func (r *Rule) Validate() error { //nolint:cyclop
+func (r *Rule) Validate() error { //nolint:cyclop,gocognit,funlen
 	// If.
 	if len(r.If) > 0 {
 		if_, err := model.NewLabelFilters(r.If)
@@ -358,6 +358,7 @@ func (r *rewriter) transformTextCrawl(ctx context.Context, crawler crawl.Crawler
 	if err != nil {
 		return "", errors.Wrapf(err, "crawl %s", url)
 	}
+
 	return string(mdBytes), nil
 }
 
@@ -383,6 +384,7 @@ func (r *rewriter) transformTextHack(text string) string {
 	text = strings.ReplaceAll(text, "```html", "")
 	text = strings.ReplaceAll(text, "```markdown", "")
 	text = strings.ReplaceAll(text, "```", "")
+
 	return text
 }
 

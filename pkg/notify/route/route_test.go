@@ -537,7 +537,7 @@ func TestConfig_Validate(t *testing.T) {
 				},
 			},
 			wantErr: true,
-			errMsg:  "invalid sub_route: invalid matcher: invalid matcher",
+			errMsg:  "invalid sub_route: invalid matchers: new label filter",
 		},
 		{
 			name: "Valid nested sub-route",
