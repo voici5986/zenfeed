@@ -185,6 +185,7 @@ zenfeed 提供了超多的自定义配置，还有很多玩法等待你挖掘。
 
 ## 鸣谢
 * 感谢 [eryajf](https://github.com/eryajf) 提供的 [Compose Inline Config](https://github.com/glidea/zenfeed/issues/1) 让部署更易理解
+* [![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
 
 ## 👏🏻 欢迎贡献
 * 目前还没有规范，只要求一点，“代码一致性”，很重要
