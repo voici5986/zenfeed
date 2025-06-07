@@ -101,6 +101,12 @@ func (r *watch) execute(ctx context.Context, start, end time.Time) error {
 		return nil
 	}
 
+	// Attach labels to feeds.
+	for _, feed := range feeds {
+		feed.Labels = append(feed.Labels, config.labels...)
+		feed.Labels.EnsureSorted()
+	}
+
 	// Split feeds by start time.
 	feedsByStart := make(map[time.Time][]*block.FeedVO) // Start time -> feeds.
 	for _, feed := range feeds {

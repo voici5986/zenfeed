@@ -83,6 +83,7 @@ func (ls *Labels) FromMap(m map[string]string) {
 	for k, v := range m {
 		*ls = append(*ls, Label{Key: k, Value: v})
 	}
+	ls.EnsureSorted()
 }
 
 func (ls Labels) Map() map[string]string {

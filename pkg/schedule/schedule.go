@@ -58,6 +58,7 @@ func (c *Config) From(app *config.App) *Config {
 			Query:         r.Query,
 			Threshold:     r.Threshold,
 			LabelFilters:  r.LabelFilters,
+			Labels:        r.Labels,
 			EveryDay:      r.EveryDay,
 			WatchInterval: time.Duration(r.WatchInterval),
 		}

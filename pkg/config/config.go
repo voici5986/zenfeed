@@ -151,6 +151,7 @@ type SchedulsRule struct {
 	Query         string            `yaml:"query,omitempty" json:"query,omitempty" desc:"The semantic query to get the feeds. NOTE it is optional"`
 	Threshold     float32           `yaml:"threshold,omitempty" json:"threshold,omitempty" desc:"The threshold to filter the query result by relevance (with 'query') score. It does not work when query is not set. Default is 0.6."`
 	LabelFilters  []string          `yaml:"label_filters,omitempty" json:"label_filters,omitempty" desc:"The label filters (equal or not equal) to match the feeds. e.g. [category=tech, source!=github]"`
+	Labels        map[string]string `yaml:"labels,omitempty" json:"labels,omitempty" desc:"The labels to attach to the feeds."`
 	EveryDay      string            `yaml:"every_day,omitempty" json:"every_day,omitempty" desc:"The query range at the end time of every day. Format: start~end, e.g. 00:00~23:59, or -22:00~7:00 (yesterday 22:00 to today 07:00)."`
 	WatchInterval timeutil.Duration `yaml:"watch_interval,omitempty" json:"watch_interval,omitempty" desc:"The run and query interval to watch the rule. Default is 10m. It can not be set with every_day at same time."`
 }

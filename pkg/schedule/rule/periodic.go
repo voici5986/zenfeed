@@ -119,6 +119,12 @@ func (r *periodic) execute(ctx context.Context, now time.Time) error {
 		return nil
 	}
 
+	// Attach labels to feeds.
+	for _, feed := range feeds {
+		feed.Labels = append(feed.Labels, config.labels...)
+		feed.Labels.EnsureSorted()
+	}
+
 	// Notify.
 	r.Dependencies().Out <- &Result{
 		Rule:  config.Name,
