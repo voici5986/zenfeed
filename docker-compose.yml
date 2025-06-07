@@ -69,7 +69,7 @@ configs:
             - transform:
                 to_text:
                   prompt: |
-                    {{ .summary_html_snippet }} Respond in ${LANGUAGE:-Chinese}
+                    {{ .summary_html_snippet_for_small_model }} Respond in ${LANGUAGE:-Chinese}
               label: summary_html_snippet
           embedding_llm: embed
       notify:
