@@ -21,8 +21,12 @@
     > 灵光一现：最近喜欢上和豆包聊新闻了，或许可以分享下如何把 zenfeed 数据接入豆包
 
 ## 中长期
-* Web 上的相关性聚合阅读
-![](images/web-reading-aggr.png)
+* 更易用的 Web（但坦诚地讲目前优先级比较低，更鼓励调用后端 api，构建一个属于你的 web
+  * 主题研究报告
+  * 屏蔽 or follow 相关新闻后续
+  * 相关性聚合阅读
+  ![](images/web-reading-aggr.png)
+> P.S. 相关功能已经实现，只不过没有下放到 Web
 
 ---
 
