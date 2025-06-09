@@ -14,7 +14,7 @@
 
 | Field                 | Type     | Description                                                                        | Default Value         | Required |
 | :-------------------- | :------- | :--------------------------------------------------------------------------------- | :-------------------- | :------- |
-| `telemetry.address`   | `string` | Exposes Prometheus metrics & pprof.                                                |                       | No       |
+| `telemetry.address`   | `string` | Exposes Prometheus metrics & pprof.                                                | `:9090`               | No       |
 | `telemetry.log`       | `object` | Log configuration related to telemetry.                                            | (See specific fields) | No       |
 | `telemetry.log.level` | `string` | Log level for telemetry-related messages, one of `debug`, `info`, `warn`, `error`. | `info`                | No       |
 

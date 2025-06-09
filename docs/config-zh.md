@@ -14,7 +14,7 @@
 
 | 字段                  | 类型     | 描述                                                                           | 默认值       | 是否必需 |
 | :-------------------- | :------- | :----------------------------------------------------------------------------- | :----------- | :------- |
-| `telemetry.address`   | `string` | 暴露 Prometheus 指标 & pprof。                                                 |              | 否       |
+| `telemetry.address`   | `string` | 暴露 Prometheus 指标 & pprof。                                                 | `:9090`      | 否       |
 | `telemetry.log`       | `object` | Telemetry 相关的日志配置。                                                     | (见具体字段) | 否       |
 | `telemetry.log.level` | `string` | Telemetry 相关消息的日志级别, 可选值为 `debug`, `info`, `warn`, `error` 之一。 | `info`       | 否       |
 
