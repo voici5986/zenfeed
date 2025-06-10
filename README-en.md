@@ -30,6 +30,10 @@ zenfeed is your <strong>AI information hub</strong>. It's an intelligent RSS rea
 
 ---
 
+**ebup2rss**: Converts ebup ebooks into RSS feeds that update a chapter daily. [join waitlist](https://ebup2rss.pages.dev)
+
+---
+
 ## 💡 Introduction
 
 RSS (Really Simple Syndication) was born in the Web 1.0 era to solve the problem of information fragmentation, allowing users to aggregate and track updates from multiple websites in one place without frequent visits. It pushes website updates to subscribers in summary form for quick information retrieval.

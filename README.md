@@ -30,6 +30,10 @@ zenfeed 是你的 <strong>AI 信息中枢</strong>。它既是<strong>智能 RSS
 
 ---
 
+**ebup2rss**: 把 ebup 电子书转成每日更新一个章节的 RSS Feed，[join waitlist](https://ebup2rss.pages.dev)
+
+---
+
 ## 💡 前言
 
 RSS（简易信息聚合）诞生于 Web 1.0 时代，旨在解决信息分散的问题，让用户能在一个地方聚合、追踪多个网站的更新，无需频繁访问。它将网站更新以摘要形式推送给订阅者，便于快速获取信息。
