@@ -1,30 +1,36 @@
 [English](README-en.md)
 
-![](docs/images/crad.png)
+<p align="center">
+  <img src="docs/images/crad.png" alt="zenfeed cover image">
+</p>
 
-三点：
+<p align="center">
+  <a href="https://app.codacy.com/gh/glidea/zenfeed/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/1b51f1087558402d85496fbe7bddde89"/></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=glidea_zenfeed"><img src="https://sonarcloud.io/api/project_badges/measure?project=glidea_zenfeed&metric=sqale_rating"/></a>
+  <a href="https://goreportcard.com/badge/github.com/glidea/zenfeed"><img src="https://goreportcard.com/badge/github.com/glidea/zenfeed"/></a>
+  <a href="https://deepwiki.com/glidea/zenfeed"><img src="https://deepwiki.com/badge.svg"/></a>
+</p>
 
-**1. AI 版 RSS 阅读器**
+<h3 align="center">在信息洪流（Feed）中，愿你保持禅定（Zen）</h3>
 
-* 在线服务
-  * https://zenfeed.xyz
-  * 或 Folo 搜索 zenfeed
+<p align="center">
+zenfeed 是你的 <strong>AI 信息中枢</strong>。它既是<strong>智能 RSS 阅读器</strong>，也是实时<strong>"新闻"知识库</strong>，更能成为帮你时刻关注"指定事件"，并呈递<strong>分析报告</strong>的私人秘书。
+</p>
 
-**2. 实时 “新闻” 知识库**
+<p align="center">
+  <a href="https://zenfeed.xyz"><b>在线体验 (仅 RSS 阅读)</b></a>
+  &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+  <a href="docs/tech/hld-zh.md"><b>技术文档</b></a>
+  &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+  <a href="#-安装与使用"><b>快速开始</b></a>
+</p>
 
-**3. 帮你时刻关注 “指定事件” 的秘书（如 “关税政策变化”，“xx 股票波动”）**，并支持整理研究报告
-
-每日研究报告（包含播客）（实验性质） -- 已暂停更新
-* [V2EX](https://v2ex.analysis.zenfeed.xyz/)
-* [LinuxDO](https://linuxdo.analysis.zenfeed.xyz/)
+> [!NOTE]
+> DeepWiki 的描述并不完全准确
 
 ---
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/glidea/zenfeed)
-**！！DeepWiki 的描述并不准确！！！**，但问答质量还行
 
-技术说明文档见：[HLD](docs/tech/hld-zh.md)
-
-## 前言
+## 💡 前言
 
 RSS（简易信息聚合）诞生于 Web 1.0 时代，旨在解决信息分散的问题，让用户能在一个地方聚合、追踪多个网站的更新，无需频繁访问。它将网站更新以摘要形式推送给订阅者，便于快速获取信息。
 
@@ -40,161 +46,192 @@ RSS（简易信息聚合）诞生于 Web 1.0 时代，旨在解决信息分散�
 
 > 参考文章：[AI 复兴 RSS ？ - 少数派](https://sspai.com/post/89494)
 
-## 项目介绍
+---
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/1b51f1087558402d85496fbe7bddde89)](https://app.codacy.com/gh/glidea/zenfeed/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=glidea_zenfeed&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=glidea_zenfeed)
-[![Go Report Card](https://goreportcard.com/badge/github.com/glidea/zenfeed)](https://goreportcard.com/report/github.com/glidea/zenfeed)
+## ✨ 特性
 
-zenfeed 是你的智能信息助手。它自动收集、筛选并总结关注的新闻或话题，然后发送给你。但我们可不是又造了一个 "今日头条"... 🤔
+![Zenfeed Architecture](docs/images/arch.png)
 
-![Zenfeed](docs/images/arch.png)
-
-**For [RSS](https://zh.wikipedia.org/wiki/RSS) 老司机** 🚗
-* zenfeed 可以是你的 AI 版 RSS 阅读器（配合 [zenfeed-web](https://github.com/glidea/zenfeed-web)）
-* [RSSHub](https://github.com/DIYgod/RSSHub) 的 [MCP](https://mcp.so/) Server
-* 可自定义可信 RSS 数据源，且速度超快的 AI 搜索引擎
-* 与 [Feedly AI](https://feedly.com/ai) 类似
+**专为 [RSS](https://zh.wikipedia.org/wiki/RSS) 老司机** 🚗
+* 你的 AI 版 RSS 阅读器（配合 [zenfeed-web](https://github.com/glidea/zenfeed-web) 使用）
+* 可作为 [RSSHub](https://github.com/DIYgod/RSSHub) 的 [MCP](https://mcp.so/) Server
+* 可自定义可信 RSS 数据源，打造速度超快的个人 AI 搜索引擎
+* 功能与 [Feedly AI](https://feedly.com/ai) 类似
 <details>
-  <summary>预览</summary>
-  <img src="docs/images/feed-list-with-web.png" alt="" width="600">
+  <summary><b>预览</b></summary>
+  <br>
+  <img src="docs/images/feed-list-with-web.png" alt="Feed list" width="600">
   <img src="docs/images/chat-with-feeds.png" alt="Chat with feeds" width="500">
 </details>
 
-
-**For [万物追踪](https://www.wwzzai.com/) 替代品寻觅者** 🔍
-* zenfeed 同样拥有 [信息追踪能力](https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md#%E8%B0%83%E5%BA%A6%E9%85%8D%E7%BD%AE-scheduls)，且更强调高质量，自定义的数据源
-* [AI 首席情报官](https://github.com/TeamWiseFlow/wiseflow?tab=readme-ov-file) 的 RSS 版，灵活版，更接近引擎形态
+**专为 [万物追踪](https://www.wwzzai.com/) 替代品寻觅者** 🔍
+* 拥有强大的[信息追踪能力](https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md#%E8%B0%83%E5%BA%A6%E9%85%8D%E7%BD%AE-scheduls)，并更强调高质量、可自定义的数据源
+* 可作为 [AI 首席情报官](https://github.com/TeamWiseFlow/wiseflow?tab=readme-ov-file) 的 RSS 版，更灵活，更接近引擎形态
 <details>
-  <summary>预览</summary>
-  <img src="docs/images/monitoring.png" alt="" width="500">
-  <img src="docs/images/notification-with-web.png" alt="" width="500">
+  <summary><b>预览</b></summary>
+  <br>
+  <img src="docs/images/monitoring.png" alt="Monitoring setup" width="500">
+  <img src="docs/images/notification-with-web.png" alt="Notification example" width="500">
 </details>
 
-
-**For 信息焦虑症患者(比如我)** 😌
-* "zenfeed" 是 "zen" 和 "feed" 的组合，意为在 feed（信息洪流）中，愿你保持 zen（禅定）
-* 如果你对时不时地刷信息流感到焦虑疲惫，这是因为上下文切换的成本比想象得高，同时也妨碍了你进入心流。推荐你试试简报功能，每天固定时间收到对应时间段的简报邮件，从而一次性地，快速地，总览地完成阅读。啊哈有点文艺复兴的意味是吗 ✨
+**专为 信息焦虑症患者 (比如我)** 😌
+* 如果你对频繁刷信息流感到疲惫，试试简报功能。每日定时收取指定时段的 AI 简报，一次性、总览式地高效阅读，告别上下文切换的隐性成本。啊哈有点文艺复兴的意味是吗 ✨
+* "zenfeed" 是 "zen" 和 "feed" 的组合，意为在 feed（信息洪流）中，愿你保持 zen（禅定）。
 <details>
-  <summary>预览</summary>
-  <img src="docs/images/daily-brief.png" alt="" width="500">
+  <summary><b>预览</b></summary>
+  <br>
+  <img src="docs/images/daily-brief.png" alt="Daily brief example" width="500">
 </details>
 
-
-**For AI 内容处理的探索者** 🔬
-* zenfeed 有一种对内容进行管道化处理的自定义机制，类似 Prometheus [Relabeling](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config)
-* 每篇内容都被抽象成一个标签集合（比如标题，来源，正文... 都是标签），在管道的每一个节点，可以基于自定义 Prompt 对特定标签值进行处理（比如评分、分类、摘要、过滤、添加新标签等...），而后基于标签查询过滤，[路由](https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md#%E9%80%9A%E7%9F%A5%E8%B7%AF%E7%94%B1%E9%85%8D%E7%BD%AE-notifyroute-%E5%8F%8A-notifyroutesub_routes)，[展示](https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md#%E9%80%9A%E7%9F%A5%E6%B8%A0%E9%81%93-email-%E9%85%8D%E7%BD%AE-notifychannelsemail)... See [Rewrite Rules](docs/tech/rewrite-zh.md)
-* 重要的是你可以灵活的编排这一切，这赋予了 zenfeed 浓重的工具化，个性化色彩。欢迎通过 Push API 集成私有数据，探索更多的可能性
+**专为 开发者** 🔬
+* **管道化处理机制**: 类似 Prometheus 的 [Relabeling](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config)，zenfeed 将每篇内容抽象为标签集，你可以在管道的每个节点，通过自定义 Prompt 对标签进行处理（评分、分类、摘要、过滤等）。
+* **灵活编排**: 基于处理后的标签，你可以自由地进行查询、过滤、[路由](https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md#%E9%80%9A%E7%9F%A5%E8%B7%AF%E7%94%B1%E9%85%8D%E7%BD%AE-notifyroute-%E5%8F%8A-notifyroutesub_routes)和[通知](https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md#%E9%80%9A%E7%9F%A5%E6%B8%A0%E9%81%93-email-%E9%85%8D%E7%BD%AE-notifychannelsemail)，赋予了 zenfeed 浓厚的工具化、个性化色彩。详情请见 [Rewrite Rules](docs/tech/rewrite-zh.md)。
+* **开放的 API**:
+  * [Query API](/docs/query-api-zh.md)
+  * [RSS Exported API](/docs/rss-api-zh.md)
+  * [Notify Webhook](/docs/webhook-zh.md)
+  * [大量声明式 YAML 配置](/docs/config-zh.md)
 <details>
-  <summary>预览</summary>
-  <img src="docs/images/update-config-with-web.png" alt="" width="500">
+  <summary><b>预览</b></summary>
+  <br>
+  <img src="docs/images/update-config-with-web.png" alt="Update config via web" width="500">
 </details>
 
+<p align="center">
+  <a href="docs/preview.md"><b>➡️ 查看更多效果预览</b></a>
+</p>
 
-**For 吃瓜群众** 🍉
+---
 
-就冲这精美的邮件样式，请立即安装使用！
+## 🚀 安装与使用
 
-<img src="docs/images/monitoring.png" alt="" width="400">
+### 1. 准备工作
 
-[更多效果预览](docs/preview.md)
+> [!IMPORTANT]
+> zenfeed 默认使用 [硅基流动](https://cloud.siliconflow.cn/) 提供的模型服务。
+> *   模型: `Qwen/Qwen3-8B` (免费) 和 `Pro/BAAI/bge-m3`。
+> *   如果你还没有硅基账号，使用 [**邀请链接**](https://cloud.siliconflow.cn/i/U2VS0Q5A) 可获得 **14 元** 赠送额度。
+> *   如果需要使用其他厂商或模型，或进行更详细的自定义部署，请参考 [配置文档](https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md) 来编辑 `docker-compose.yml`。
 
-## 安装与使用
+### 2. 一键部署
 
-### 1. 安装
-> 最快 1min 拉起
+> 最快 1 分钟拉起服务。
 
-默认使用硅基流动的 Qwen/Qwen3-8B (免费) 和 Pro/BAAI/bge-m3。如果你还没有硅基账号，使用 [邀请链接](https://cloud.siliconflow.cn/i/U2VS0Q5A) 得 14 元额度
-
-如果需要使用其他厂商或模型，或自定义部署：请编辑下方 **docker-compose.yml**#configs.zenfeed_config.content.
-参考 [配置文档](https://github.com/glidea/zenfeed/blob/main/docs/config-zh.md)
-
-#### Mac/Linux
+#### Mac / Linux
 
 ```bash
+# 下载配置文件
 curl -L -O https://raw.githubusercontent.com/glidea/zenfeed/main/docker-compose.yml
 
-API_KEY=硅基流动apikey docker-compose -p zenfeed up -d
+# 启动服务 (请替换你的 API_KEY)
+API_KEY="sk-..." docker-compose -p zenfeed up -d
 ```
 
-#### Windows
-> 使用 PowerShell 执行
+#### Windows (PowerShell)
+
 ```powershell
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/glidea/zenfeed/main/docker-compose.yml" -OutFile ([System.IO.Path]::GetFileName("https://raw.githubusercontent.com/glidea/zenfeed/main/docker-compose.yml"))
+# 下载配置文件
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/glidea/zenfeed/main/docker-compose.yml" -OutFile "docker-compose.yml"
 
-$env:API_KEY = "硅基流动apikey"; docker-compose -p zenfeed up -d
+# 启动服务 (请替换你的 API_KEY)
+$env:API_KEY = "sk-..."; docker-compose -p zenfeed up -d
 ```
 
-安装完成！访问 https://zenfeed-web.pages.dev
+🎉 **部署完成！**
+访问 http://localhost:1400
 
-### 2. 使用 Web 端
+> [!WARNING]
+> *   如果将 zenfeed 部署在 VPS 等公网环境，请通过 `http://<你的IP>:1400` 访问，并确保防火墙/安全组已放行 `1400` 端口。
+> *   **安全提示：** zenfeed 尚无认证机制，将服务暴露到公网可能会泄露您的 `API_KEY`。请务必配置严格的安全组规则，仅对信任的 IP 开放访问。
 
-> 如果部署在 VPS 等环境请访问 https://vps_public_ip:1400（记得开放安全组端口），不要使用上方的公共前端
-> ⚠️ zenfeed 尚无认证手段，暴露到公网可能会泄露 APIKey，请小心设置安全组。如果你有这方面的安全需求请提 Issue
+### 3. 开始使用
 
 #### 添加 RSS 订阅源
 
-<img src="docs/images/web-add-source.png" alt="" width="400">
+<img src="docs/images/web-add-source.png" alt="Add RSS source via web" width="400">
 
-> 从 Follow 迁移过来，参考 [migrate-from-follow.md](docs/migrate-from-follow.md)
-> 需要访问对应的源站，请保证网络畅通
-> 添加后稍等几分钟，特别模型有严格速率限制的情况下
+> *   从 Follow 迁移，请参考 [migrate-from-follow.md](docs/migrate-from-follow.md)。
+> *   添加后 zenfeed 需要访问源站，请保证网络畅通。
+> *   添加后请稍等几分钟，等待内容抓取和处理，尤其是在模型有严格速率限制的情况下。
 
-#### 配置每日简报，监控等
+#### 配置每日简报、监控等
 
-<img src="docs/images/notification-with-web.png" alt="" width="400">
+<img src="docs/images/notification-with-web.png" alt="Configure notifications via web" width="400">
 
-### 3. 配置 MCP（可选）
-以 Cherry Studio 为例，配置 MCP 并连接到 Zenfeed，见 [Cherry Studio MCP](docs/cherry-studio-mcp.md)
-> 默认地址 http://localhost:1301/sse
+#### 配置 MCP（可选）
+以 Cherry Studio 为例，配置 MCP 并连接到 Zenfeed，见 [Cherry Studio MCP](docs/cherry-studio-mcp.md)。
+> 默认地址 `http://localhost:1301/sse`
 
-### 后续
+#### More...
+页面暂时没法表达 zenfeed 强大的灵活性，更多玩法请查阅[配置文档](docs/config-zh.md)
 
-zenfeed 提供了超多的自定义配置，还有很多玩法等待你挖掘。详细请查阅[文档](/docs/)
+---
 
-### Roadmap
+## 🗺️ Roadmap
 
-[Roadmap](/docs/roadmap-zh.md)
+我们规划了一些很 cool 的功能，欢迎查看 [Roadmap](/docs/roadmap-zh.md) 并提出你的建议！
 
-## 欢迎加群讨论
-> 使用问题请提 Issue，谢绝微信私聊。帮助有类似问题的朋友
+---
 
-<img src="docs/images/wechat.png" alt="Wechat" width="150">
+## 💬 交流与支持
 
-都看到这里了，顺手点个 Star ⭐️ 呗，用于防止我太监掉
+> **使用问题请优先提 [Issue](https://github.com/glidea/zenfeed/issues)**，这能帮助到有类似问题的朋友，也能更好地追踪和解决问题。
 
-有好玩的 AI 工作请联系我！
+<table>
+  <tr>
+    <td align="center">
+      <img src="docs/images/wechat.png" alt="Wechat QR Code" width="150">
+      <br>
+      <strong>加群讨论</strong>
+    </td>
+    <td align="center">
+      <img src="docs/images/sponsor.png" alt="Sponsor QR Code" width="150">
+      <br>
+      <strong>请杯咖啡 🧋</strong>
+    </td>
+  </tr>
+</table>
 
-喜欢本项目的话，赞助杯🧋（赛博要饭）
+都看到这里了，顺手点个 **Star ⭐️** 呗，这是我持续维护的最大动力！
 
-<img src="docs/images/sponsor.png" alt="Wechat" width="150">
+有好玩的 AI 工作也请联系我！
 
-## 生态项目
+---
+
+## 🧩 生态项目
 
 ### [入行365日报](https://daily.ruhang365.com)
+入行365创立于2017年，希望以入行资讯交流为起点，与大家一起建立一个分享专业、共同成长的社区。致力于为广大互联网从业人员提供全面的入行咨询、培训、小圈交流、资源协作等相关服务。
 
-入行365创立于2017年，希望以入行资讯交流为起点，与大家一起建立一个分享专业、共同成长的社区。
+*实验性内容源 (已暂停更新)*
+*   [V2EX](https://v2ex.analysis.zenfeed.xyz/)
+*   [LinuxDO](https://linuxdo.analysis.zenfeed.xyz/)
 
-致力于为广大互联网从业人员提供全面的入行咨询、培训、小圈交流、资源协作等相关服务。
+---
 
-## 注意
-* 1.0 版本之前不保证兼容性
-* 项目采用 AGPL3 协议，任何 Fork 都需要开源
-* 商用请联系报备，可提供合理范围内的支持。注意是合法商用哦，不欢迎搞灰色
-* 数据不会永久保存，默认只存储 8 天
+## 📝 注意事项与免责声明
 
-## 鸣谢
-* 感谢 [eryajf](https://github.com/eryajf) 提供的 [Compose Inline Config](https://github.com/glidea/zenfeed/issues/1) 让部署更易理解
-* [![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
+### 注意事项
+*   **版本兼容性:** 1.0 版本之前不保证 API 和配置的向后兼容性。
+*   **开源协议:** 项目采用 AGPLv3 协议，任何 Fork 和分发都必须保持开源。
+*   **商业使用:** 商用请联系作者报备，可在合理范围内提供支持。我们欢迎合法的商业用途，不欢迎利用本项目从事灰色产业。
+*   **数据存储:** 数据不会永久保存，默认只存储 8 天。
 
-## 👏🏻 欢迎贡献
-* 目前还没有规范，只要求一点，“代码一致性”，很重要
+### 鸣谢
+*   感谢 [eryajf](https://github.com/eryajf) 提供的 [Compose Inline Config](https://github.com/glidea/zenfeed/issues/1) 建议，让部署更易理解。
+*   [![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
 
-## 免责声明 (Disclaimer)
+### 欢迎贡献
+*   目前贡献规范尚在完善，但我们坚守一个核心原则："代码风格一致性"。
 
-**在使用 `zenfeed` 软件（以下简称“本软件”）前，请仔细阅读并理解本免责声明。您的下载、安装、使用本软件或任何相关服务的行为，即表示您已阅读、理解并同意接受本声明的所有条款。如果您不同意本声明的任何内容，请立即停止使用本软件。**
+### 免责声明 (Disclaimer)
 
-1.  **“按原样”提供:** 本软件按“现状”和“可用”的基础提供，不附带任何形式的明示或默示担保。项目作者和贡献者不对本软件的适销性、特定用途适用性、非侵权性、准确性、完整性、可靠性、安全性、及时性或性能做出任何保证或陈述。
+<details>
+<summary><strong>点击展开查看完整免责声明</strong></summary>
+
+**在使用 `zenfeed` 软件（以下简称"本软件"）前，请仔细阅读并理解本免责声明。您的下载、安装、使用本软件或任何相关服务的行为，即表示您已阅读、理解并同意接受本声明的所有条款。如果您不同意本声明的任何内容，请立即停止使用本软件。**
+
+1.  **"按原样"提供:** 本软件按"现状"和"可用"的基础提供，不附带任何形式的明示或默示担保。项目作者和贡献者不对本软件的适销性、特定用途适用性、非侵权性、准确性、完整性、可靠性、安全性、及时性或性能做出任何保证或陈述。
 
 2.  **用户责任:** 您将对使用本软件的所有行为承担全部责任。这包括但不限于：
     *   **数据源选择:** 您自行负责选择并配置要接入的数据源（如 RSS feeds、未来可能的 Email 源等）。您必须确信您有权访问和处理这些数据源的内容，并遵守其各自的服务条款、版权政策及相关法律法规。
@@ -215,4 +252,6 @@ zenfeed 提供了超多的自定义配置，还有很多玩法等待你挖掘。
 8.  **修改与接受:** 项目作者保留随时修改本免责声明的权利。继续使用本软件将被视为接受修改后的条款。
 
 **请再次注意：使用本软件抓取、处理和分发受版权保护的内容可能存在法律风险。用户有责任确保其使用行为符合所有适用的法律法规和第三方服务条款。对于任何因用户滥用或不当使用本软件而引起的法律纠纷或损失，项目作者和贡献者不承担任何责任。**
+
+</details>
 
