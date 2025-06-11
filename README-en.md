@@ -30,7 +30,7 @@ zenfeed is your <strong>AI information hub</strong>. It's an intelligent RSS rea
 
 ---
 
-**ebup2rss**: Converts ebup ebooks into RSS feeds that update a chapter daily. [join waitlist](https://ebup2rss.pages.dev)
+**epub2rss**: Convert epub ebooks into RSS feeds that update with a chapter every day, [join waitlist](https://epub2rss.pages.dev/)
 
 ---
 

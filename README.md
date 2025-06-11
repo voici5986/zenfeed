@@ -30,7 +30,7 @@ zenfeed 是你的 <strong>AI 信息中枢</strong>。它既是<strong>智能 RSS
 
 ---
 
-**ebup2rss**: 把 ebup 电子书转成每日更新一个章节的 RSS Feed，[join waitlist](https://ebup2rss.pages.dev)
+**epub2rss**: 把 epub 电子书转成每日更新一个章节的 RSS Feed，[join waitlist](https://epub2rss.pages.dev/)
 
 ---
 
