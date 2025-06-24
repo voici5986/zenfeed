@@ -47,7 +47,7 @@
       transform:
         to_text:
           llm: "qwen-default" # 使用名为 "qwen-default" 的 LLM 配置
-          prompt: "category"  # 使用预设的 "category" prompt 模板
+          prompt: "{{ .category }} 可以接着补充你额外的要求"  # 使用预设的 "category" prompt 模板
       match: ".+"             # 匹配 LLM 返回的任何非空分类结果
       action: "create_or_update_label"
       label: "category"       # 新标签的键为 "category"
@@ -65,7 +65,7 @@
           transform:
             to_text:
               llm: "qwen-default"
-              prompt: "score" # 使用预设的 "score" prompt 模板
+              prompt: "{{ .score }} 可以接着补充你额外的要求" # 使用预设的 "score" prompt 模板
           match: "^([0-9]|10)$" # 确保 LLM 返回的是 0-10 的数字
           action: "create_or_update_label"
           label: "ai_score"  # 将评分结果存入 "ai_score" 标签
