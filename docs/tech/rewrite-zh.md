@@ -52,7 +52,7 @@
       action: "create_or_update_label"
       label: "category"       # 新标签的键为 "category"
     ```
-*   **效果**: 如果一篇文章内容是关于人工智能的，LLM 可能会返回 "Technology"。经过此规则处理后，文章的标签集会增加或更新一个标签，例如 `{"category", "Technology"}`。
+*   **效果**: 如果一篇文章内容是关于人工智能的，LLM 可能会返回 "Technology"。经过此规则处理后，文章的标签集会增加或更新一个标签，例如 `{"category", "Technology"}`。**后续可用于，“查询分类为 Technology 的文章”，“基于分类为 Technology 的文章发送每日科技日报”...**
 
 ### 示例 2: 基于 LLM 评分过滤低质量内容
 
