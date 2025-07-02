@@ -1,5 +1,26 @@
 [English](README-en.md)
 
+---
+# 合作伙伴
+[![image](docs/images/302.jpg)](https://share.302.ai/mFS9MS)
+
+[302.AI](https://share.302.ai/mFS9MS)是一个按需付费的AI应用平台，提供市面上最全的AI API和AI在线应用。 
+* 面向用户：我们提供了50多种AI应用，涵盖文字、图片和音视频各个领域，无需月费，按用量付费，在线使用。 
+* 面向开发者：一站式接入几乎所有AI应用开发需要用到的模型和API，一站式付费，统一接入。 
+* 面向企业：管理与使用界面分离，一人管理，多人使用，降低中小企业使用AI的门槛和成本。
+
+> 以下是我的个人感受
+> * 播客生成效果不错，产品设计也不错，能基于 RSS 内容生成，修改播客脚本... 比市面其它播客产品更全面
+> * 中转价格大多与官方一致，比如硅基 qwen3 8b 同样免费
+> * 支持 MCP，Agent 托管
+> * 拥抱开源，平台上各种 AI 应用都是开源的。可以看他们的 [开源账户](https://github.com/302ai)
+
+看都看了，GitHub 一键登录 [注册一个](https://share.302.ai/mFS9MS) 试试吧！立即获得 1 美元额度
+
+---
+
+# 正文
+
 <p align="center">
   <img src="docs/images/crad.png" alt="zenfeed cover image">
 </p>
@@ -31,6 +52,7 @@ zenfeed 是你的 <strong>AI 信息中枢</strong>。它既是<strong>智能 RSS
 ---
 
 **epub2rss**: 把 epub 电子书转成每日更新一个章节的 RSS Feed，[join waitlist](https://epub2rss.pages.dev/)
+**one-coffee**: 一款类似 syft，万物追踪的日报产品（差异点：支持播客等多模态；高质量信源，主攻 AI 领域）。下方加我微信加入 waitlist
 
 ---
 
@@ -199,17 +221,6 @@ $env:API_KEY = "sk-..."; docker-compose -p zenfeed up -d
 都看到这里了，顺手点个 **Star ⭐️** 呗，这是我持续维护的最大动力！
 
 有好玩的 AI 工作也请联系我！
-
----
-
-## 🧩 生态项目
-
-### [入行365日报](https://daily.ruhang365.com)
-入行365创立于2017年，希望以入行资讯交流为起点，与大家一起建立一个分享专业、共同成长的社区。致力于为广大互联网从业人员提供全面的入行咨询、培训、小圈交流、资源协作等相关服务。
-
-*实验性内容源 (已暂停更新)*
-*   [V2EX](https://v2ex.analysis.zenfeed.xyz/)
-*   [LinuxDO](https://linuxdo.analysis.zenfeed.xyz/)
 
 ---
 
