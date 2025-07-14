@@ -77,7 +77,7 @@ storage:
     -   `speakers`: 定义播客的演讲者。
         -   `name`: 演讲者的名字。
         -   `role`: 演讲者的角色和人设，将影响脚本内容。
-        -   `voice`: 演讲者的声音。请参考 [Google Cloud TTS 文档](https://cloud.google.com/text-to-speech/docs/voices) 获取可用的声音名称（例如 `en-US-Standard-C`，`en-US-News-N`）。
+        -   `voice`: 演讲者的声音。请参考 [Gemini TTS 文档](https://ai.google.dev/gemini-api/docs/speech-generation#voices)。
 
 **示例 `config.yaml`:**
 
@@ -85,20 +85,23 @@ storage:
 storage:
   feed:
     rewrites:
-      - source_label: "content"
-        label: "podcast_url"
+      - source_label: content # 基于原文
         transform:
           to_podcast:
-            llm: "openai-chat"
-            tts_llm: "gemini-tts"
-            transcript_additional_prompt: "使用中文回复"
+            estimate_maximum_duration: 3m0s # 接近 3 分钟
+            transcript_additional_prompt: 对话引人入胜，流畅自然，拒绝 AI 味，使用中文回复 # 脚本内容要求
+            llm: xxxx # 负责生成脚本的 llm
+            tts_llm: gemini-tts # 仅支持 gemini tts，推荐使用 https://github.com/glidea/one-balance 轮询
             speakers:
-              - name: "主持人小雅"
-                role: "一位经验丰富、声音甜美、风格活泼的科技播客主持人。擅长联系实际生活场景。"
-                voice: "zh-CN-Standard-A" # 女声
-              - name: "技术评论员老王"
-                role: "一位对技术有深入见解、观点犀利的评论员，说话直接，偶尔有些愤世嫉俗。"
-                voice: "zh-CN-Standard-B" # 男声
+              - name: 小雅
+                role: >-
+                  一位经验丰富、声音甜美、风格活泼的科技播客主持人。前财经记者、媒体人出身，因为工作原因长期关注科技行业，后来凭着热爱和出色的口才转行做了全职内容创作者。擅长从普通用户视角出发，把复杂的技术概念讲得生动有趣，是她发掘了老王，并把他‘骗’来一起做播客的‘始作俑者’。
+                voice: Autonoe
+              - name: 老王
+                role: >-
+                  一位资深科技评论员，互联网老兵。亲身经历过中国互联网从草莽到巨头的全过程，当过程序员，做过产品经理，也创过业。因此他对行业的各种‘风口’和‘概念’有自己独到的、甚至有些刻薄的见解。观点犀利，一针见血，说话直接，热衷于给身边的一切产品挑刺。被‘忽悠’上了‘贼船’，表面上经常吐槽，但内心很享受这种分享观点的感觉。
+                voice: Puck
+        label: podcast_url
 ```
 
 配置完成后，Zenfeed 将在每次抓取到新文章时，自动执行上述流程。可以在通知模版中使用 podcast_url label，或 Web 中直接收听（Web 固定读取 podcast_url label，若使用别的名称则无法读取）
