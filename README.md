@@ -9,13 +9,7 @@
 * 面向开发者：一站式接入几乎所有AI应用开发需要用到的模型和API，一站式付费，统一接入。 
 * 面向企业：管理与使用界面分离，一人管理，多人使用，降低中小企业使用AI的门槛和成本。
 
-> 以下是我的个人感受
-> * 播客生成效果不错，产品设计也不错，能基于 RSS 内容生成，修改播客脚本... 比市面其它播客产品更全面
-> * 中转价格大多与官方一致，比如硅基 qwen3 8b 同样免费
-> * 支持 MCP，Agent 托管
-> * 拥抱开源，平台上各种 AI 应用都是开源的。可以看他们的 [开源账户](https://github.com/302ai)
-
-看都看了，GitHub 一键登录 [注册一个](https://share.302.ai/mFS9MS) 试试吧！立即获得 1 美元额度
+GitHub 一键登录 [注册一个](https://share.302.ai/mFS9MS) 试试吧！立即获得 1 美元额度
 
 ---
 
@@ -54,6 +48,14 @@ zenfeed 是你的 <strong>AI 信息中枢</strong>。它既是<strong>智能 RSS
 **epub2rss**: 把 epub 电子书转成每日更新一个章节的 RSS Feed，[join waitlist](https://epub2rss.pages.dev/)
 
 **one-coffee**: 一款类似 syft，万物追踪的日报产品（差异点：支持播客等多模态；高质量信源，主攻 AI 领域）。下方加我微信加入 waitlist
+
+---
+
+**赞助项目可以领取 Gemini Key**
+
+<a href="https://afdian.com/a/glidea"><img src="docs/images/sponsor.png" width="500"></a>
+<br/>
+<a href="https://afdian.com/a/glidea">赞助项目，支持发展</a>
 
 ---
 
