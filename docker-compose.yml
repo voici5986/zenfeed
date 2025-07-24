@@ -60,7 +60,7 @@ configs:
           api_key: ${API_KEY:-your-api-key}
         - name: embed
           provider: siliconflow
-          embedding_model: Pro/BAAI/bge-m3
+          embedding_model: Qwen/Qwen3-Embedding-4B
           api_key: ${API_KEY:-your-api-key}
       scrape:
         rsshub_endpoint: http://rsshub:1200

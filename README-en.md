@@ -113,7 +113,7 @@ Give zenfeed a try! **AI + RSS** might be a better way to consume information in
 
 > [!IMPORTANT]
 > zenfeed uses model services from [SiliconFlow](https://cloud.siliconflow.cn/en) by default.
-> *   Models: `Qwen/Qwen3-8B` (Free) and `Pro/BAAI/bge-m3`.
+> *   Models: `Qwen/Qwen3-8B` (Free) and `Qwen/Qwen3-Embedding-4B`.
 > *   If you don't have a SiliconFlow account yet, use this [**invitation link**](https://cloud.siliconflow.cn/i/U2VS0Q5A) to get a **¥14** credit.
 > *   If you need to use other providers or models, or for more detailed custom deployments, please refer to the [Configuration Documentation](https://github.com/glidea/zenfeed/blob/main/docs/config.md) to edit `docker-compose.yml`.
 
