@@ -19,7 +19,6 @@ import (
 	"context"
 	"io"
 	"net/url"
-	"reflect"
 	"strings"
 
 	"github.com/minio/minio-go/v7"
@@ -47,11 +46,18 @@ type Config struct {
 	Endpoint        string
 	AccessKeyID     string
 	SecretAccessKey string
-	Bucket          string
-	BucketURL       string
+	client          *minio.Client
+
+	Bucket    string
+	BucketURL string
+	bucketURL *url.URL
 }
 
 func (c *Config) Validate() error {
+	if c.Empty() {
+		return nil
+	}
+
 	if c.Endpoint == "" {
 		return errors.New("endpoint is required")
 	}
@@ -64,12 +70,26 @@ func (c *Config) Validate() error {
 	if c.SecretAccessKey == "" {
 		return errors.New("secret access key is required")
 	}
+	client, err := minio.New(c.Endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(c.AccessKeyID, c.SecretAccessKey, ""),
+		Secure: true,
+	})
+	if err != nil {
+		return errors.Wrap(err, "new minio client")
+	}
+	c.client = client
+
 	if c.Bucket == "" {
 		return errors.New("bucket is required")
 	}
 	if c.BucketURL == "" {
 		return errors.New("bucket url is required")
 	}
+	u, err := url.Parse(c.BucketURL)
+	if err != nil {
+		return errors.Wrap(err, "parse public url")
+	}
+	c.bucketURL = u
 
 	return nil
 }
@@ -84,6 +104,10 @@ func (c *Config) From(app *config.App) *Config {
 	}
 
 	return c
+}
+
+func (c *Config) Empty() bool {
+	return c.Endpoint == "" && c.AccessKeyID == "" && c.SecretAccessKey == "" && c.Bucket == "" && c.BucketURL == ""
 }
 
 type Dependencies struct{}
@@ -113,19 +137,6 @@ func new(instance string, app *config.App, dependencies Dependencies) (Storage, 
 		return nil, errors.Wrap(err, "validate config")
 	}
 
-	client, err := minio.New(config.Endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(config.AccessKeyID, config.SecretAccessKey, ""),
-		Secure: true,
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, "new minio client")
-	}
-
-	u, err := url.Parse(config.BucketURL)
-	if err != nil {
-		return nil, errors.Wrap(err, "parse public url")
-	}
-
 	return &s3{
 		Base: component.New(&component.BaseConfig[Config, Dependencies]{
 			Name:         "ObjectStorage",
@@ -133,39 +144,40 @@ func new(instance string, app *config.App, dependencies Dependencies) (Storage, 
 			Config:       config,
 			Dependencies: dependencies,
 		}),
-		client:    client,
-		bucketURL: u,
 	}, nil
 }
 
 // --- Implementation code block ---
 type s3 struct {
 	*component.Base[Config, Dependencies]
-
-	client    *minio.Client
-	bucketURL *url.URL
 }
 
 func (s *s3) Put(ctx context.Context, key string, body io.Reader, contentType string) (publicURL string, err error) {
 	ctx = telemetry.StartWith(ctx, append(s.TelemetryLabels(), telemetrymodel.KeyOperation, "Put")...)
 	defer func() { telemetry.End(ctx, err) }()
-	bucket := s.Config().Bucket
+	config := s.Config()
+	if config.Empty() {
+		return "", errors.New("not configured")
+	}
 
-	if _, err := s.client.PutObject(ctx, bucket, key, body, -1, minio.PutObjectOptions{
+	if _, err := config.client.PutObject(ctx, config.Bucket, key, body, -1, minio.PutObjectOptions{
 		ContentType: contentType,
 	}); err != nil {
 		return "", errors.Wrap(err, "put object")
 	}
 
-	return s.bucketURL.JoinPath(key).String(), nil
+	return config.bucketURL.JoinPath(key).String(), nil
 }
 
 func (s *s3) Get(ctx context.Context, key string) (publicURL string, err error) {
 	ctx = telemetry.StartWith(ctx, append(s.TelemetryLabels(), telemetrymodel.KeyOperation, "Get")...)
 	defer func() { telemetry.End(ctx, err) }()
-	bucket := s.Config().Bucket
+	config := s.Config()
+	if config.Empty() {
+		return "", errors.New("not configured")
+	}
 
-	if _, err := s.client.StatObject(ctx, bucket, key, minio.StatObjectOptions{}); err != nil {
+	if _, err := config.client.StatObject(ctx, config.Bucket, key, minio.StatObjectOptions{}); err != nil {
 		errResponse := minio.ToErrorResponse(err)
 		if errResponse.Code == minio.NoSuchKey {
 			return "", ErrNotFound
@@ -174,7 +186,7 @@ func (s *s3) Get(ctx context.Context, key string) (publicURL string, err error) 
 		return "", errors.Wrap(err, "stat object")
 	}
 
-	return s.bucketURL.JoinPath(key).String(), nil
+	return config.bucketURL.JoinPath(key).String(), nil
 }
 
 func (s *s3) Reload(app *config.App) (err error) {
@@ -187,29 +199,7 @@ func (s *s3) Reload(app *config.App) (err error) {
 		return errors.Wrap(err, "validate config")
 	}
 
-	if reflect.DeepEqual(s.Config(), newConfig) {
-		log.Debug(ctx, "object storage config not changed")
-
-		return nil
-	}
-
-	client, err := minio.New(newConfig.Endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(newConfig.AccessKeyID, newConfig.SecretAccessKey, ""),
-		Secure: true,
-	})
-	if err != nil {
-		return errors.Wrap(err, "new minio client")
-	}
-
-	u, err := url.Parse(newConfig.BucketURL)
-	if err != nil {
-		return errors.Wrap(err, "parse public url")
-	}
-
-	s.client = client
-	s.bucketURL = u
 	s.SetConfig(newConfig)
-
 	log.Info(ctx, "object storage reloaded")
 
 	return nil
