@@ -35,6 +35,8 @@ zenfeed 是你的 <strong>AI 信息中枢</strong>。它既是<strong>智能 RSS
 <p align="center">
   <a href="https://zenfeed.xyz"><b>在线体验 (仅 RSS 阅读)</b></a>
   &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/xusonfan/zenfeedApp"><b>安卓版体验 (仅 RSS 阅读)</b></a>
+  &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
   <a href="docs/tech/hld-zh.md"><b>技术文档</b></a>
   &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
   <a href="#-安装与使用"><b>快速开始</b></a>
@@ -175,6 +177,7 @@ $env:API_KEY = "sk-..."; docker-compose -p zenfeed up -d
 > *   **安全提示：** zenfeed 尚无认证机制，将服务暴露到公网可能会泄露您的 `API_KEY`。请务必配置严格的安全组规则，仅对信任的 IP 开放访问。
 
 ### 3. 开始使用
+> 安卓版：https://github.com/xusonfan/zenfeedApp
 
 #### 添加 RSS 订阅源
 
