@@ -21,6 +21,7 @@ import (
 	"io"
 	"reflect"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -406,6 +407,9 @@ func (c *cached) String(ctx context.Context, messages []string) (string, error) 
 	value, err := c.LLM.String(ctx, messages)
 	if err != nil {
 		return "", err
+	}
+	if strings.Trim(value, " \n\r\t") == "" {
+		return "", errors.New("empty response") // Gemini may occur this.
 	}
 
 	// TODO: reduce copies.
