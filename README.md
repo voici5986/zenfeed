@@ -1,3 +1,5 @@
+[Nano Banana🍌 公益站](https://image-generation.zenfeed.xyz/)：集成 Twitter 热门 Prompt，轻松玩转各种姿势
+---
 [English](README-en.md)
 
 ---
