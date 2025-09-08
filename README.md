@@ -217,7 +217,7 @@ $env:API_KEY = "sk-..."; docker-compose -p zenfeed up -d
     <td align="center">
       <img src="docs/images/wechat.png" alt="Wechat QR Code" width="300">
       <br>
-      <strong>加群讨论</strong>
+      <strong>AI 学习交流社群</strong>
     </td>
     <td align="center">
       <img src="docs/images/sponsor.png" width="500">
