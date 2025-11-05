@@ -95,10 +95,11 @@ type LLM struct {
 }
 
 type Scrape struct {
-	Past           timeutil.Duration `yaml:"past,omitempty" json:"past,omitempty" desc:"The lookback time window for scraping feeds. e.g. 1h means only scrape feeds in the past 1 hour. Default: 3d"`
-	Interval       timeutil.Duration `yaml:"interval,omitempty" json:"interval,omitempty" desc:"How often to scrape each source, it is a global interval. e.g. 1h. Default: 1h"`
-	RSSHubEndpoint string            `yaml:"rsshub_endpoint,omitempty" json:"rsshub_endpoint,omitempty" desc:"The endpoint of the RSSHub. You can deploy your own RSSHub server or use the public one (https://docs.rsshub.app/guide/instances). e.g. https://rsshub.app. It is required when sources[].rss.rsshub_route_path is set."`
-	Sources        []ScrapeSource    `yaml:"sources,omitempty" json:"sources,omitempty" desc:"The sources for scraping feeds."`
+	Past            timeutil.Duration `yaml:"past,omitempty" json:"past,omitempty" desc:"The lookback time window for scraping feeds. e.g. 1h means only scrape feeds in the past 1 hour. Default: 3d"`
+	Interval        timeutil.Duration `yaml:"interval,omitempty" json:"interval,omitempty" desc:"How often to scrape each source, it is a global interval. e.g. 1h. Default: 1h"`
+	RSSHubEndpoint  string            `yaml:"rsshub_endpoint,omitempty" json:"rsshub_endpoint,omitempty" desc:"The endpoint of the RSSHub. You can deploy your own RSSHub server or use the public one (https://docs.rsshub.app/guide/instances). e.g. https://rsshub.app. It is required when sources[].rss.rsshub_route_path is set."`
+	RSSHubAccessKey string            `yaml:"rsshub_access_key,omitempty" json:"rsshub_access_key,omitempty" desc:"The access key for RSSHub. Used for access control. (see [RSSHub config](https://docs.rsshub.app/deploy/config#access-control-configurations))"`
+	Sources         []ScrapeSource    `yaml:"sources,omitempty" json:"sources,omitempty" desc:"The sources for scraping feeds."`
 }
 
 type Storage struct {
@@ -133,6 +134,7 @@ type ScrapeSource struct {
 type ScrapeSourceRSS struct {
 	URL             string `yaml:"url,omitempty" json:"url,omitempty" desc:"The URL of the RSS feed. e.g. http://localhost:1200/github/trending/daily/any. You can not set it when rsshub_route_path is set."`
 	RSSHubRoutePath string `yaml:"rsshub_route_path,omitempty" json:"rsshub_route_path,omitempty" desc:"The RSSHub route path of the RSS feed. e.g. github/trending/daily/any. It will be joined with the rsshub_endpoint as the final URL."`
+	// RSSHubAccessKey string `yaml:"rsshub_access_key,omitempty" json:"rsshub_access_key,omitempty" desc:"The access key for accessing RSSHub routes. If set, it will be appended as a query parameter to the URL."`
 }
 
 type RewriteRule struct {

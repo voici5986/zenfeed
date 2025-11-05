@@ -33,6 +33,7 @@ type ScrapeSourceRSS struct {
 	URL             string
 	RSSHubEndpoint  string
 	RSSHubRoutePath string
+	RSSHubAccessKey string
 }
 
 func (c *ScrapeSourceRSS) Validate() error {
@@ -44,6 +45,15 @@ func (c *ScrapeSourceRSS) Validate() error {
 	}
 	if c.URL != "" && !strings.HasPrefix(c.URL, "http://") && !strings.HasPrefix(c.URL, "https://") {
 		return errors.New("URL must be a valid HTTP/HTTPS URL")
+	}
+
+	// Append access key as query parameter if provided
+	if c.RSSHubAccessKey != "" && !strings.Contains(c.URL, "key=") {
+		if strings.Contains(c.URL, "?") {
+			c.URL += "&key=" + c.RSSHubAccessKey
+		} else {
+			c.URL += "?key=" + c.RSSHubAccessKey
+		}
 	}
 
 	return nil
