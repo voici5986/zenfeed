@@ -134,7 +134,6 @@ type ScrapeSource struct {
 type ScrapeSourceRSS struct {
 	URL             string `yaml:"url,omitempty" json:"url,omitempty" desc:"The URL of the RSS feed. e.g. http://localhost:1200/github/trending/daily/any. You can not set it when rsshub_route_path is set."`
 	RSSHubRoutePath string `yaml:"rsshub_route_path,omitempty" json:"rsshub_route_path,omitempty" desc:"The RSSHub route path of the RSS feed. e.g. github/trending/daily/any. It will be joined with the rsshub_endpoint as the final URL."`
-	// RSSHubAccessKey string `yaml:"rsshub_access_key,omitempty" json:"rsshub_access_key,omitempty" desc:"The access key for accessing RSSHub routes. If set, it will be appended as a query parameter to the URL."`
 }
 
 type RewriteRule struct {

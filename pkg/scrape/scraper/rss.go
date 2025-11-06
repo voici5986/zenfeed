@@ -48,7 +48,7 @@ func (c *ScrapeSourceRSS) Validate() error {
 	}
 
 	// Append access key as query parameter if provided
-	if c.RSSHubAccessKey != "" && !strings.Contains(c.URL, "key=") {
+	if c.RSSHubEndpoint != "" && c.RSSHubAccessKey != "" && !strings.Contains(c.URL, "key=") {
 		if strings.Contains(c.URL, "?") {
 			c.URL += "&key=" + c.RSSHubAccessKey
 		} else {
