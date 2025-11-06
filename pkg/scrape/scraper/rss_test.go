@@ -166,7 +166,7 @@ func TestNewRSS(t *testing.T) {
 					Expect(r).NotTo(BeNil())
 					rssReader, ok := r.(*rssReader)
 					Expect(ok).To(BeTrue())
-					Expect(rssReader.config.URL).To(Equal("http://example.com/feed?key=testkey"))
+					Expect(rssReader.config.URL).To(Equal("http://example.com/feed"))
 					Expect(rssReader.config.RSSHubAccessKey).To(Equal("testkey"))
 				},
 			},
