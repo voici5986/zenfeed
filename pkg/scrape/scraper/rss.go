@@ -48,6 +48,12 @@ func (c *ScrapeSourceRSS) Validate() error {
 	}
 
 	// Append access key as query parameter if provided
+	c.appendAccessKey()
+
+	return nil
+}
+
+func (c *ScrapeSourceRSS) appendAccessKey() {
 	if c.RSSHubEndpoint != "" && c.RSSHubAccessKey != "" && !strings.Contains(c.URL, "key=") {
 		if strings.Contains(c.URL, "?") {
 			c.URL += "&key=" + c.RSSHubAccessKey
@@ -55,8 +61,6 @@ func (c *ScrapeSourceRSS) Validate() error {
 			c.URL += "?key=" + c.RSSHubAccessKey
 		}
 	}
-
-	return nil
 }
 
 // --- Factory code block ---
